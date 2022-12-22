@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[41,)"
+license="MIT License"
+[[mods]]
+modId="structurecontrolutility"
+version="${file.jarVersion}"
+displayName="Structure Control Utility Mod"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/structure-control-utility"
+updateJSONURL="https://github.com/mactso/structurecontrolutility/raw/main/update.json"
+logoFile="Logo.png"
+authors="MacTso, Lupicus"
+description='Structure Control Utility Mod.'
+[[dependencies.structurecontrolutility]]
+    modId="forge"
+    mandatory=true
+    versionRange="[41,)"
+    ordering="NONE"
+    side="SERVER"
+
+[[dependencies.structurecontrolutility]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19,1.20)"
+    ordering="NONE"
+    side="SERVER"
