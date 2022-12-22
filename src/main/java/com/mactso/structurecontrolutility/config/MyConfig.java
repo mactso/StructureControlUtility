@@ -32,15 +32,15 @@ public class MyConfig {
 		debugLevel = i; // note: doesn't save to config file- intentionally temporary
 	}
 	
-	public static int getStopBreakTicks() {
-		return stopBreakMinutes*TICKS_PER_MINUTE;
+	public static long getStopBreakTicks() {
+		return (long)stopBreakMinutes*TICKS_PER_MINUTE;
 	}
 
-	public static int getStopFireTicks() {
-		return stopFireMinutes*TICKS_PER_MINUTE;
+	public static long getStopFireTicks() {
+		return (long)stopFireMinutes*TICKS_PER_MINUTE;
 	}
-	public static int getStopExplosionTicks() {
-		return stopExplosionMinutes*TICKS_PER_MINUTE;
+	public static long getStopExplosionTicks() {
+		return (long)stopExplosionMinutes*TICKS_PER_MINUTE;
 	}
 
 	private static int    debugLevel;

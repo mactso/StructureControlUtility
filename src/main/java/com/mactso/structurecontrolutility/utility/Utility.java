@@ -97,9 +97,6 @@ public class Utility {
 	public static boolean isAreaProtected(LevelAccessor level, BlockPos pos) {
 		ChunkAccess chunk = level.getChunk(pos);
 		long ageInTicks = chunk.getInhabitedTime();
-		if (ageInTicks > 240000) {
-			return false;
-		}
 
 		BlockState bs = level.getBlockState(pos);
 		if ((bs.is(BlockTags.DIRT))) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.mactso.structurecontrolutility.Main;
+import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mactso.structurecontrolutility.utility.Utility;
 
 import net.minecraft.core.BlockPos;
@@ -14,14 +15,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.level.BlockEvent;
@@ -47,19 +46,21 @@ public class BlockEvents {
 		} else if (!(event.getPosition().isPresent())) {
 			return;
 		}
-
+		BlockPos ePos = event.getPosition().get();
 		Player p = event.getEntity();
-		Vec3 rfv = p.getForward().reverse().scale(0.6);
 		LevelAccessor level = p.level;
 		long gameTime = ((Level) level).getGameTime();
+		if (level.getChunk(ePos).getInhabitedTime() > MyConfig.getStopBreakTicks())
+			return;
+
 		RandomSource rand = level.getRandom();
-		BlockPos ePos = event.getPosition().get();
+
+		Vec3 rfv = p.getForward().reverse().scale(0.6);
 
 		float adjustY = 0;
 		if (p.blockPosition().getY() < ePos.getY()) {
 			adjustY = -0.5f;
 		}
-		
 
 		if ((Utility.isAreaProtected(level, ePos))) {
 			if (cGameTime < gameTime) {
@@ -69,7 +70,7 @@ public class BlockEvents {
 					double x = 0.5d + (double) ePos.getX() + rand.nextDouble() * (double) 0.1F;
 					double y = 0.5d + (double) ePos.getY() + rand.nextDouble() + adjustY;
 					double z = 0.5d + (double) ePos.getZ() + rand.nextDouble();
-					((ServerLevel) level).sendParticles(ParticleTypes.WITCH, x, y, z , 3, rfv.x, rfv.y, rfv.z, -0.04D);
+					((ServerLevel) level).sendParticles(ParticleTypes.WITCH, x, y, z, 3, rfv.x, rfv.y, rfv.z, -0.04D);
 				}
 			}
 		}
@@ -79,23 +80,25 @@ public class BlockEvents {
 	@SubscribeEvent
 	public static void onBreakBlock(BreakEvent event) {
 
-		// server side only event.
-		ServerPlayer sp = (ServerPlayer) event.getPlayer();
-		LevelAccessor serverLevel = (ServerLevel) sp.level;
-		BlockPos pos = event.getPos();
-		BlockState bs = serverLevel.getBlockState(pos);
-		Block b = bs.getBlock();
+		if (event.getPlayer().level.getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
+			return;
 
+		ServerPlayer sp = (ServerPlayer) event.getPlayer();
 		if (sp.isCreative())
 			return;
 
-		if (Utility.isAreaProtected(serverLevel, pos) && event.isCancelable()) {
+		ServerLevel serverLevel = (ServerLevel) sp.level;
+
+		if (Utility.isAreaProtected((LevelAccessor) serverLevel, event.getPos()) && event.isCancelable()) {
 			event.setCanceled(true);
 		}
 	}
 
 	@SubscribeEvent
 	public static void onBlockPlacement(EntityPlaceEvent event) {
+
+		if (event.getEntity().level.getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
+			return;
 
 		LevelAccessor level = event.getLevel();
 		BlockPos pos = event.getPos();
@@ -117,10 +120,12 @@ public class BlockEvents {
 
 	@SubscribeEvent
 	public static void onExplosionDetonate(Detonate event) {
+
+		if (event.getLevel().getChunk(new BlockPos(event.getExplosion().getPosition())).getInhabitedTime() > MyConfig
+				.getStopExplosionTicks())
+			return;
 		Level level = event.getLevel();
 		List<BlockPos> list = event.getAffectedBlocks();
-		Vec3 vPos = event.getExplosion().getPosition();
-		BlockPos pos = new BlockPos(vPos);
 
 		for (ListIterator<BlockPos> iter = list.listIterator(list.size()); iter.hasPrevious();) {
 			BlockPos tPos = iter.previous();
@@ -137,6 +142,9 @@ public class BlockEvents {
 		if (event.getState().getBlock() != Blocks.FIRE) {
 			return;
 		}
+		if (event.getLevel().getChunk(new BlockPos(event.getPos())).getInhabitedTime() > MyConfig
+				.getStopFireTicks())
+			return;
 
 		LevelAccessor level = event.getLevel();
 		BlockPos ePos = event.getPos();
@@ -153,10 +161,7 @@ public class BlockEvents {
 					WorldTickHandler.addFirePos(pos); // TODO: by dimension later
 					return;
 				}
-
 			}
-//			}
 		}
 	}
-
 }
