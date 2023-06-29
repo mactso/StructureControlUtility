@@ -48,7 +48,7 @@ public class BlockEvents {
 		}
 		BlockPos ePos = event.getPosition().get();
 		Player p = event.getEntity();
-		LevelAccessor level = p.level;
+		LevelAccessor level = p.level();
 		long gameTime = ((Level) level).getGameTime();
 		if (level.getChunk(ePos).getInhabitedTime() > MyConfig.getStopBreakTicks())
 			return;
@@ -80,14 +80,14 @@ public class BlockEvents {
 	@SubscribeEvent
 	public static void onBreakBlock(BreakEvent event) {
 
-		if (event.getPlayer().level.getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
+		if (event.getPlayer().level().getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
 			return;
 
 		ServerPlayer sp = (ServerPlayer) event.getPlayer();
 		if (sp.isCreative())
 			return;
 
-		ServerLevel serverLevel = (ServerLevel) sp.level;
+		ServerLevel serverLevel = (ServerLevel) sp.level();
 
 		if (Utility.isAreaProtected((LevelAccessor) serverLevel, event.getPos()) && event.isCancelable()) {
 			event.setCanceled(true);
@@ -97,7 +97,7 @@ public class BlockEvents {
 	@SubscribeEvent
 	public static void onBlockPlacement(EntityPlaceEvent event) {
 
-		if (event.getEntity().level.getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
+		if (event.getEntity().level().getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakTicks())
 			return;
 
 		LevelAccessor level = event.getLevel();
@@ -121,7 +121,7 @@ public class BlockEvents {
 	@SubscribeEvent
 	public static void onExplosionDetonate(Detonate event) {
 
-		if (event.getLevel().getChunk(new BlockPos(event.getExplosion().getPosition())).getInhabitedTime() > MyConfig
+		if (event.getLevel().getChunk(BlockPos.containing(event.getExplosion().getPosition())).getInhabitedTime() > MyConfig
 				.getStopExplosionTicks())
 			return;
 		Level level = event.getLevel();
@@ -150,14 +150,14 @@ public class BlockEvents {
 		BlockPos ePos = event.getPos();
 		MutableBlockPos pos = new MutableBlockPos(ePos.getX(), ePos.getY(), ePos.getZ());
 
-		System.out.println("Neighbor Notify Pos=" + pos + " : ");
+		Utility.debugMsg(1, pos, "Neighbor Notify Event");
 		for (Direction d : event.getNotifiedSides()) {
-			System.out.println(d.getName() + " " + d.getNormal() + ", ");
+			Utility.debugMsg(2,d.getName() + " " + d.getNormal() + ", ");
 			BlockPos dpos = pos.east(d.getStepX()).south(d.getStepZ()).above(d.getStepY());
 			if (level.getBlockState(dpos).isFlammable(level, pos, d.getOpposite())) {
-				System.out.println(", is flammable");
+				Utility.debugMsg(2,", is flammable");
 				if (Utility.isAreaProtected(level, pos)) {
-					System.out.println(d.getName() + ", and is protected.");
+					Utility.debugMsg(2,d.getName() + ", and is protected.");
 					WorldTickHandler.addFirePos(pos); // TODO: by dimension later
 					return;
 				}
