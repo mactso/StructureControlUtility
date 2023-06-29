@@ -150,14 +150,14 @@ public class BlockEvents {
 		BlockPos ePos = event.getPos();
 		MutableBlockPos pos = new MutableBlockPos(ePos.getX(), ePos.getY(), ePos.getZ());
 
-		System.out.println("Neighbor Notify Pos=" + pos + " : ");
+		Utility.debugMsg(1, pos, "Neighbor Notify Event");
 		for (Direction d : event.getNotifiedSides()) {
-			System.out.println(d.getName() + " " + d.getNormal() + ", ");
+			Utility.debugMsg(2,d.getName() + " " + d.getNormal() + ", ");
 			BlockPos dpos = pos.east(d.getStepX()).south(d.getStepZ()).above(d.getStepY());
 			if (level.getBlockState(dpos).isFlammable(level, pos, d.getOpposite())) {
-				System.out.println(", is flammable");
+				Utility.debugMsg(2,", is flammable");
 				if (Utility.isAreaProtected(level, pos)) {
-					System.out.println(d.getName() + ", and is protected.");
+					Utility.debugMsg(2,d.getName() + ", and is protected.");
 					WorldTickHandler.addFirePos(pos); // TODO: by dimension later
 					return;
 				}

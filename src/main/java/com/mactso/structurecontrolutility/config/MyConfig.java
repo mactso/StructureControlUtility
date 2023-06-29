@@ -3,6 +3,7 @@ package com.mactso.structurecontrolutility.config;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.mactso.structurecontrolutility.Main;
+import com.mactso.structurecontrolutility.utility.Utility;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
@@ -15,7 +16,7 @@ public class MyConfig {
 	
 	public static final Common COMMON;
 	public static final ForgeConfigSpec COMMON_SPEC;
-	public static int TICKS_PER_MINUTE;
+	public static int TICKS_PER_MINUTE = 1200;
 
 	static
 	{
@@ -58,9 +59,7 @@ public class MyConfig {
 	}	
 
 	public static void pushDebugValue() {
-		if (debugLevel > 0) {
-			System.out.println("Happy Trails Debug Level:"+MyConfig.debugLevel);
-		}
+		Utility.debugMsg(1, "Happy Trails Debug Level:"+MyConfig.debugLevel);
 		COMMON.debugLevel.set( MyConfig.debugLevel);
 	}
 
