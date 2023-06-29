@@ -5,15 +5,17 @@ import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+
+
 
 public class ModCommands {
 	String subcommand = "";
 	String value = "";
 
 	
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher)
+	public static void register(CommandDispatcher<CommandSource> dispatcher)
 	{
 		dispatcher.register(Commands.literal("happytrails").requires((source) -> 
 			{

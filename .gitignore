@@ -1,13 +1,10 @@
-/.gradle/
+.gradle
 /build/
+/logs/
 /.classpath
 /.settings/
 /bin/
 /run/
 /build/
 /.project
-/runClient.launch
-/runData.launch
-/runServer.launch
-/.metadata/
-/runGameTestServer.launch
+/*.launch

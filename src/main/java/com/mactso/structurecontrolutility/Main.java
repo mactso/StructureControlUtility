@@ -6,8 +6,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.mactso.structurecontrolutility.commands.ModCommands;
 import com.mactso.structurecontrolutility.config.MyConfig;
+import com.mactso.structurecontrolutility.events.BlockEvents;
 import com.mactso.structurecontrolutility.utility.Utility;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -35,6 +37,7 @@ public class Main {
 		@SubscribeEvent 
 		public void preInit (final FMLCommonSetupEvent event) {
 			System.out.println("structurecontrolutility: Registering Handlers");
+
 		}       
 
 		@Mod.EventBusSubscriber(bus = Bus.FORGE)
