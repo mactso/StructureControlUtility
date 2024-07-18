@@ -33,7 +33,27 @@ public class MyConfig {
 		debugLevel = i; // note: doesn't save to config file- intentionally temporary
 	}
 	
-	public static long getStopBreakTicks() {
+	public static int getEffectsMinutes() {
+		return structureEffectsMinutes;
+	}
+
+	public static long getStructureEffectsTicks() {
+		return (long)structureEffectsMinutes*TICKS_PER_MINUTE;
+	}
+	
+	public static int getStopFireMinutes() {
+		return stopFireMinutes;
+	}
+
+	public static int getStopBreakingMinutes() {
+		return stopBreakMinutes;
+	}
+
+	public static int getStopExplosionMinutes() {
+		return stopExplosionMinutes;
+	}
+
+	public static long getStopBreakingTicks() {
 		return (long)stopBreakMinutes*TICKS_PER_MINUTE;
 	}
 
@@ -45,6 +65,7 @@ public class MyConfig {
 	}
 
 	private static int    debugLevel;
+	private static int    structureEffectsMinutes;
 	private static int    stopFireMinutes;
 	private static int    stopBreakMinutes;
 	private static int    stopExplosionMinutes;		
@@ -59,49 +80,56 @@ public class MyConfig {
 	}	
 
 	public static void pushDebugValue() {
-		Utility.debugMsg(1, "Happy Trails Debug Level:"+MyConfig.debugLevel);
+		Utility.debugMsg(1, "Structure Control Utility Debug Level:"+MyConfig.debugLevel);
 		COMMON.debugLevel.set( MyConfig.debugLevel);
 	}
 
 	public static void bakeConfig()
 	{
+		if (debugLevel > 0) {
+			System.out.println("Structure Control Utility Debug: " + debugLevel );
+		}
 		debugLevel = COMMON.debugLevel.get();
+		structureEffectsMinutes = COMMON.structureEffectsMinutes.get();
 		stopBreakMinutes = COMMON.stopBreakMinutes.get();
 		stopFireMinutes = COMMON.stopFireMinutes.get();
 		stopExplosionMinutes = COMMON.stopExplosionMinutes.get();
 		debugLevel = COMMON.debugLevel.get();
-		if (debugLevel > 0) {
-			System.out.println("Happy Trails Debug: " + debugLevel );
-		}
 	}
 	
 	public static class Common {
 
 		public final IntValue     debugLevel;
+		public final IntValue     structureEffectsMinutes;
 		public final IntValue     stopFireMinutes;
 		public final IntValue     stopBreakMinutes;
 		public final IntValue     stopExplosionMinutes;		
 		
 		public Common(ForgeConfigSpec.Builder builder) {
-			builder.push("Happy Trail Control Values");
+			builder.push("Structure Control Utility control Values");
 			
 			debugLevel = builder
 					.comment("Debug Level: 0 = Off, 1 = Log, 2 = Chat+Log")
 					.translation(Main.MODID + ".config." + "debugLevel")
 					.defineInRange("debugLevel", () -> 0, 0, 2);
-
+			
+			structureEffectsMinutes = builder
+					.comment("Minutes before structure potion effects end.")
+					.translation(Main.MODID + ".config." + "structureEffectsMinutes")
+					.defineInRange("structureEffectsMinutes", () -> 10080, 0, Integer.MAX_VALUE);
+			
 			stopFireMinutes = builder
-					.comment("how many minutes before structures can burn")
+					.comment("Default minutes before structures can burn")
 					.translation(Main.MODID + ".config." + "stopFireMinutes ")
 					.defineInRange("stopFireMinutes ", () -> 10080, 0, Integer.MAX_VALUE);
 			
 			stopBreakMinutes = builder
-					.comment("how many minutes before entities can break blocks")
+					.comment("Default minutes before entities can break blocks")
 					.translation(Main.MODID + ".config." + "stopBreakMinutes")
 					.defineInRange("stopBreakMinutes", () -> 720, 0, Integer.MAX_VALUE);
 
 			stopExplosionMinutes = builder
-					.comment("how many minutes before explosions can break blocks")
+					.comment("Default minutes before explosions can break blocks")
 					.translation(Main.MODID + ".config." + "stopExplosionMinutes")
 					.defineInRange("stopExplosionMinutes", () -> 720, 0, Integer.MAX_VALUE);
 			
