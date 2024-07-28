@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.ibm.icu.util.StringTokenizer;
 import com.mactso.structurecontrolutility.Main;
 import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mactso.structurecontrolutility.utility.Utility;
