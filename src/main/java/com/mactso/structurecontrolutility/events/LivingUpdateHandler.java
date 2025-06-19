@@ -5,6 +5,7 @@ import com.mactso.structurecontrolutility.managers.StructureManager;
 import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
 import com.mactso.structurecontrolutility.utility.Utility;
 
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
@@ -52,7 +53,7 @@ public class LivingUpdateHandler {
 	}
 
 
-	public static void helperUpdateEffect (LivingEntity e, int intensity, MobEffect me) {
+	public static void helperUpdateEffect (LivingEntity e, int intensity, Holder<MobEffect> me) {
 		
 		if (intensity == 0) return;
 		

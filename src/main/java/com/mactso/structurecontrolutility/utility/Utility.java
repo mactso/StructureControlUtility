@@ -17,6 +17,7 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -34,7 +35,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoublePlantBlock;
-import net.minecraft.world.level.block.GravelBlock;
 import net.minecraft.world.level.block.KelpBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.SeagrassBlock;
@@ -47,7 +47,7 @@ import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.WebBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -269,7 +269,7 @@ public class Utility {
 		if ((bs.getBlock() == Blocks.EMERALD_BLOCK)) {
 			return false;
 		}
-		
+
 		if ((bs.is(BlockTags.DIRT))) {
 			return false;
 		}
@@ -334,8 +334,8 @@ public class Utility {
 			return false;
 		}
 
-		
-		if ((bs.getBlock() instanceof GravelBlock)) {
+		// TODO: is this valid?
+		if ((bs.getBlock() == Blocks.GRAVEL)) {
 			return false;
 		}
 
@@ -379,7 +379,7 @@ public class Utility {
 		return true;
 	}
 
-	public static void updateEffect(LivingEntity e, int amplifier, MobEffect mobEffect, int duration) {
+	public static void updateEffect(LivingEntity e, int amplifier, Holder<MobEffect> mobEffect, int duration) {
 
 		MobEffectInstance ei = e.getEffect(mobEffect);
 		if (amplifier == 10) {

@@ -28,7 +28,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
@@ -63,6 +63,13 @@ public class StructureManager {
 				new FileInputStream("config/structurecontrolutility/structures.csv"))) {
 			BufferedReader br = new BufferedReader(input);
 			while ((line = br.readLine()) != null) {
+				if (line.isEmpty() ) {
+					continue;
+				}
+				if (line.equals("") ) {
+					continue;
+				}	
+
 				if (line.charAt(0) == '*') {
 					continue;
 				}
