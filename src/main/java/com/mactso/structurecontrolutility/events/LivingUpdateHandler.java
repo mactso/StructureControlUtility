@@ -43,8 +43,8 @@ public class LivingUpdateHandler {
 		
 		if (ageInTicks > MyConfig.getStructureEffectsTicks()) return;
 		
-		helperUpdateEffect ((LivingEntity) sp, si.getJumpBoostIntensity(), MobEffects.JUMP);		
-		helperUpdateEffect ((LivingEntity) sp, si.getNightVisionIntensity(), MobEffects.MOVEMENT_SLOWDOWN);		
+		helperUpdateEffect ((LivingEntity) sp, si.getJumpBoostIntensity(), MobEffects.JUMP_BOOST);		
+		helperUpdateEffect ((LivingEntity) sp, si.getNightVisionIntensity(), MobEffects.SLOWNESS);		
 		helperUpdateEffect ((LivingEntity) sp, si.getRegenerationIntensity() , MobEffects.REGENERATION);		
 		helperUpdateEffect ((LivingEntity) sp, si.getSlowFallingIntensity(), MobEffects.SLOW_FALLING);	
 		helperUpdateEffect ((LivingEntity) sp, si.getWaterBreathingIntensity(), MobEffects.WATER_BREATHING);		

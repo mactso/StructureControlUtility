@@ -13,7 +13,6 @@ import com.mactso.structurecontrolutility.utility.Utility;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig;
@@ -26,11 +25,11 @@ public class Main {
 	    public static final String MODID = "structurecontrolutility"; 
 		private static final Logger LOGGER = LogManager.getLogger();
 	    
-	    public Main()
+	    public Main(FMLJavaModLoadingContext context)
 	    {
+			context.getModEventBus().register(this);
+			context.registerConfig(ModConfig.Type.COMMON, MyConfig.COMMON_SPEC);
 	    	Utility.debugMsg(0,MODID + ": Registering Mod.");
-	  		FMLJavaModLoadingContext.get().getModEventBus().register(this);
- 	        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON,MyConfig.COMMON_SPEC );
 			
 	    }
 

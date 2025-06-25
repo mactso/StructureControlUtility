@@ -11,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class ModCommands {
@@ -38,11 +37,11 @@ public class ModCommands {
 
 	public static int doReport(ServerPlayer p) {
 
-		Utility.sendChat((Player) p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		Utility.sendChat( p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
 		String key = StructureManager.insideStructure(p.serverLevel(), p.blockPosition());
 		if (key == null) {
-			Utility.sendChat((Player) p, "You are not inside a Structure.", ChatFormatting.GREEN);
+			Utility.sendChat( p, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
@@ -78,7 +77,7 @@ public class ModCommands {
 			}
 
 		}
-		Utility.sendChat((Player) p, chatMessage, ChatFormatting.GREEN);
+		Utility.sendChat( p, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

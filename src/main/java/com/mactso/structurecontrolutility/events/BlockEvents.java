@@ -166,7 +166,7 @@ public class BlockEvents {
 			if (Utility.isProtectableBlock(event.getState())) {
 				if (event.isCancelable()) {
 					if (event.getEntity() instanceof ServerPlayer sp) {
-						Utility.updateHands(sp);
+						Utility.updateHands( sp);
 					}
 					doFailureEffects(event.getEntity(), event.getPos());
 					event.setCanceled(true);
@@ -258,7 +258,7 @@ public class BlockEvents {
 
 		Utility.debugMsg(1, pos, "Neighbor Notify Event");
 		for (Direction d : event.getNotifiedSides()) {
-			Utility.debugMsg(2, d.getName() + " " + d.getNormal() + ", ");
+			Utility.debugMsg(2, d.getName() + " " + d.getUnitVec3i()+ ", ");
 			BlockPos dpos = pos.relative(d);
 			if (level.getBlockState(dpos).isFlammable(level, pos, d.getOpposite())) {
 				Utility.debugMsg(2, ", is flammable");

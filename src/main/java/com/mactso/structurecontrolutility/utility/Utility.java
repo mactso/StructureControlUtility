@@ -1,9 +1,8 @@
 package com.mactso.structurecontrolutility.utility;
 
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,13 +21,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -50,7 +49,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraftforge.common.Tags;
 
 public class Utility {
@@ -76,7 +74,7 @@ public class Utility {
 
 	public static final int FOUR_SECONDS = 80;
 
-	public static void dbgChatln(Player p, String msg, int level) {
+	public static void dbgChatln(ServerPlayer p, String msg, int level) {
 		if (MyConfig.getDebugLevel() > level - 1) {
 			sendChat(p, msg, ChatFormatting.YELLOW);
 		}
@@ -91,7 +89,7 @@ public class Utility {
 	}
 
 	public static void debugMsg(int level, BlockPos pos, String dMsg) {
-		
+
 		if (MyConfig.getDebugLevel() > level - 1) {
 			LOGGER.info("L" + level + " (" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "): " + dMsg);
 		}
@@ -107,7 +105,7 @@ public class Utility {
 
 	}
 
-	public static void sendBoldChat(Player p, String chatMessage, ChatFormatting textColor) {
+	public static void sendBoldChat(ServerPlayer p, String chatMessage, ChatFormatting textColor) {
 
 		MutableComponent component = Component.literal(chatMessage);
 		component.setStyle(component.getStyle().withBold(true));
@@ -116,11 +114,11 @@ public class Utility {
 
 	}
 
-	public static void sendChat(Player p, String chatMessage) {
+	public static void sendChat(ServerPlayer p, String chatMessage) {
 		sendChat(p, chatMessage, ChatFormatting.DARK_GREEN);
 	}
 
-	public static void sendChat(Player p, String chatMessage, ChatFormatting textColor) {
+	public static void sendChat(ServerPlayer p, String chatMessage, ChatFormatting textColor) {
 
 		MutableComponent component = Component.literal(chatMessage);
 		component.setStyle(component.getStyle().withColor(textColor));
@@ -144,11 +142,7 @@ public class Utility {
 			return false;
 		}
 
-		Optional<Registry<Structure>> opt = level.registryAccess().registry(Registries.STRUCTURE);
-		if (opt.isEmpty()) {
-			int debug = 3;
-		}
-		Registry<Structure> structRegistry = opt.get();
+		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
 		Set<Entry<Structure, LongSet>> structureReferences = chunk.getAllReferences().entrySet();
 		for (Entry<Structure, LongSet> entry : structureReferences) {
@@ -190,31 +184,34 @@ public class Utility {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * fix client side view of the hotbar for non creative
 	 */
 	public static void updateHands(ServerPlayer player)
+
 	{
+		final int OFF_HAND_SLOT = 45;
+		final int HOT_BAR_SLOT = 36;
+		
 		if (player.connection == null)
 			return;
-		ItemStack itemstack = player.getInventory().getSelected();
-		if (!itemstack.isEmpty())
-			slotChanged(player, 36 + player.getInventory().selected, itemstack);
-		itemstack = player.getInventory().offhand.get(0);
-		if (!itemstack.isEmpty())
-			slotChanged(player, 45, itemstack);
+
+		if (!player.getInventory().getSelectedItem().isEmpty()) {
+			slotChanged(player, HOT_BAR_SLOT + player.getInventory().getSelectedSlot(), player.getInventory().getSelectedItem());
+		}
+		if (!player.getOffhandItem().isEmpty())
+			slotChanged(player, OFF_HAND_SLOT, player.getOffhandItem());
 	}
-	
-	public static void slotChanged(ServerPlayer player, int index, ItemStack itemstack)
-	{
+
+	public static void slotChanged(ServerPlayer player, int index, ItemStack itemstack) {
 		InventoryMenu menu = player.inventoryMenu;
-    	player.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), index, itemstack));
+		player.connection.send(
+				new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), index, itemstack));
 	}
 
 	public static boolean isProtectableBlock(BlockState bs) {
 
-	
 		if ((bs.getBlock() == Blocks.RAW_GOLD_BLOCK)) {
 			return false;
 		}
@@ -229,7 +226,6 @@ public class Utility {
 			return false;
 		}
 
-		
 		if ((bs.getBlock() == Blocks.RAW_IRON_BLOCK)) {
 			return false;
 		}
@@ -265,7 +261,7 @@ public class Utility {
 		if ((bs.getBlock() == Blocks.RED_MUSHROOM)) {
 			return false;
 		}
-		
+
 		if ((bs.getBlock() == Blocks.EMERALD_BLOCK)) {
 			return false;
 		}
@@ -285,7 +281,7 @@ public class Utility {
 		if ((bs.is(BlockTags.LEAVES))) {
 			return false;
 		}
-	
+
 		if ((bs.is(Tags.Blocks.ORES))) {
 			return false;
 		}
@@ -313,7 +309,7 @@ public class Utility {
 		if ((bs.getBlock() instanceof WebBlock)) {
 			return false;
 		}
-		
+
 		if ((bs.getBlock() instanceof TallGrassBlock)) {
 			return false;
 		}
@@ -358,7 +354,7 @@ public class Utility {
 		if ((bs.getBlock() instanceof VineBlock)) {
 			return false;
 		}
-		
+
 		return true;
 	}
 

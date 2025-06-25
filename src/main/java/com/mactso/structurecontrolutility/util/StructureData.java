@@ -13,7 +13,6 @@ import com.mactso.structurecontrolutility.utility.Utility;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -79,8 +78,7 @@ public class StructureData {
 
 		int linenumber = 0;
 		MinecraftServer server = event.getServer();
-		RegistryAccess dynreg = server.registryAccess();
-		Registry<Structure> structRegistry = dynreg.registryOrThrow(Registries.STRUCTURE);
+		Registry<Structure> structRegistry = server.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 		
 		int effectsMinutes = MyConfig.getEffectsMinutes();
 		int stopFireMinutes = MyConfig.getStopFireMinutes();
