@@ -137,7 +137,8 @@ public class Utility {
 		boolean isFire = false;
 		if (level.getBlockState(pos).getBlock() == Blocks.FIRE)
 			isFire = true;
-
+		if (damageType == DAMAGE_FIRE)
+			isFire = true;
 		if (!isProtectableBlock(bs)) {
 			return false;
 		}

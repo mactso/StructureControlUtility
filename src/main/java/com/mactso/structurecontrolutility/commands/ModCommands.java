@@ -35,17 +35,17 @@ public class ModCommands {
 		return 1;
 	}
 
-	public static int doReport(ServerPlayer p) {
+	public static int doReport(ServerPlayer sp) {
 
-		Utility.sendChat( p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		Utility.sendChat( sp, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
-		String key = StructureManager.insideStructure(p.serverLevel(), p.blockPosition());
+		String key = StructureManager.insideStructure(sp.level(), sp.blockPosition());
 		if (key == null) {
-			Utility.sendChat( p, "You are not inside a Structure.", ChatFormatting.GREEN);
+			Utility.sendChat( sp, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
-		ChunkAccess chunk = p.serverLevel().getChunk(p.blockPosition());
+		ChunkAccess chunk = sp.level().getChunk(sp.blockPosition());
 
 		long ageInTicks = chunk.getInhabitedTime();
 		long ageInMinutes = ageInTicks / Utility.TICKS_PER_MINUTE;
@@ -77,7 +77,7 @@ public class ModCommands {
 			}
 
 		}
-		Utility.sendChat( p, chatMessage, ChatFormatting.GREEN);
+		Utility.sendChat( sp, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

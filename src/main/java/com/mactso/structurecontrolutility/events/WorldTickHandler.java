@@ -8,8 +8,7 @@ import com.mactso.structurecontrolutility.Main;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.event.TickEvent.LevelTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
@@ -17,28 +16,30 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 public class WorldTickHandler {
 	static List<BlockPos> firePosList = new ArrayList<BlockPos>();
 	static List<BlockPos> lavaPosList = new ArrayList<BlockPos>();
-	
-	// assumes this event only raised for server worlds. TODO verify.
+
 	@SubscribeEvent
-	public static void onWorldTickEvent(LevelTickEvent event) {
-		if (event.phase == Phase.START)
-			return;
+	public static void onWorldTickEvent(LevelTickEvent.Post event) {
+
+		List<BlockPos> workFirePosList = new ArrayList<BlockPos>();
 
 		synchronized (firePosList) {
-			for (BlockPos pos : firePosList) {
-				if (event.level.getBlockState(pos).getBlock() == Blocks.FIRE) {
-					event.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-				}
-			}
+			workFirePosList.addAll(firePosList);
 			firePosList.clear();
 		}
-		synchronized (lavaPosList) {
+		for (BlockPos pos : workFirePosList) {
+			if (event.level.getBlockState(pos).getBlock() == Blocks.FIRE) {
+				event.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+			}
+		}
+
+		synchronized (lavaPosList)
+		{
 			for (BlockPos pos : lavaPosList) {
 				if (event.level.getBlockState(pos).getBlock() == Blocks.LAVA) {
 					event.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 				}
 			}
-			firePosList.clear();
+			lavaPosList.clear();
 		}
 
 	}
@@ -54,5 +55,5 @@ public class WorldTickHandler {
 			lavaPosList.add(lavaPos);
 		}
 	}
-	
+
 }

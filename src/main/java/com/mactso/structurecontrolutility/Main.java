@@ -12,7 +12,7 @@ import com.mactso.structurecontrolutility.utility.Utility;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig;
@@ -27,16 +27,16 @@ public class Main {
 	    
 	    public Main(FMLJavaModLoadingContext context)
 	    {
-			context.getModEventBus().register(this);
 			context.registerConfig(ModConfig.Type.COMMON, MyConfig.COMMON_SPEC);
+	        FMLCommonSetupEvent.getBus(context.getModBusGroup()).addListener(this::handleCommonSetup);
 	    	Utility.debugMsg(0,MODID + ": Registering Mod.");
 			
 	    }
 
 	    // Register ourselves for server and other game events we are interested in
 		@SubscribeEvent 
-		public void preInit (final FMLCommonSetupEvent event) {
-			System.out.println("structurecontrolutility: Registering Handlers");
+		public void handleCommonSetup (final FMLCommonSetupEvent event) {
+			// nothing happens in here any more.
 		}       
 
 		@Mod.EventBusSubscriber(bus = Bus.FORGE)

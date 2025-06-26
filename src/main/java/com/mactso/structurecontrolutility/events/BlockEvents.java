@@ -30,13 +30,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.Result;
 import net.minecraftforge.event.entity.player.PlayerEvent.BreakSpeed;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.BlockEvent.BreakEvent;
 import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.event.level.ExplosionEvent.Detonate;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
@@ -45,6 +46,9 @@ public class BlockEvents {
 	// client side variables.
 	static long cGameTime = 0;
 
+	static boolean CANCEL_EVENT = true;
+	static boolean CONTINUE_EVENT = false;
+	
 	private static void doFailureEffects(Entity e) {
 		doFailureEffects(e, e.blockPosition());
 	}
@@ -73,15 +77,17 @@ public class BlockEvents {
 	}
 
 	@SubscribeEvent
-	public static void onRightClickBlock(RightClickBlock event) {
+	public static boolean onRightClickBlock(RightClickBlock event) {
 
 		Player e = event.getEntity();
 
 		if (!(e instanceof Player))
-			return;
+			return CONTINUE_EVENT;
+		
 
 		if (!(event.getEntity() instanceof ServerPlayer))
-			return;
+			return CONTINUE_EVENT;
+		
 		ServerPlayer sp = (ServerPlayer) e;
 
 		@NotNull
@@ -89,21 +95,17 @@ public class BlockEvents {
 		Item item = sp.getItemInHand(hand).getItem();
 
 		if (!(item instanceof BucketItem)) {
-			return;
+			return CONTINUE_EVENT;
 		}
 
 		BucketItem bucket = (BucketItem) item;
 
 		if (bucket.getFluid() != Fluids.LAVA) {
-			return;
+			return CONTINUE_EVENT;
 		}
 
-		if (!(Utility.insideProtectedStructure(sp.serverLevel(), sp.blockPosition(), Utility.DAMAGE_FIRE))) {
-			return;
-		}
-
-		if (event.isCancelable()) {
-			event.setCanceled(true);
+		if (!(Utility.insideProtectedStructure(sp.level(), sp.blockPosition(), Utility.DAMAGE_FIRE))) {
+			return CONTINUE_EVENT;
 		}
 
 		@NotNull
@@ -120,90 +122,82 @@ public class BlockEvents {
 		WorldTickHandler.addLavaPos(dpos);
 		doFailureEffects(sp, dpos);
 
+		return CANCEL_EVENT;
+
 	}
 
-//	@SubscribeEvent
-//	public static void onFluidPlacement(FluidPlaceBlockEvent event) {
-//
-//		LevelAccessor level = event.getLevel();
-//		BlockPos pos = event.getPos();
-//
-//		if (event.getState() == Blocks.LAVA.defaultBlockState()) {
-//			if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_FIRE)) {
-//				if (event.isCancelable()) {
-//					event.setCanceled(true);
-//				}
-//			}
-//		}
-//
-//	}
-
 	@SubscribeEvent
-	public static void onBlockPlacement(EntityPlaceEvent event) {
+	public static boolean onBlockPlacement(EntityPlaceEvent event) {
 
+		
 		if (event.getEntity().level().getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakingTicks())
-			return;
-
-		LevelAccessor level = event.getLevel();
-		RandomSource rand = level.getRandom();
-		BlockPos pos = event.getPos();
-		Block block = event.getPlacedBlock().getBlock();
+			return CONTINUE_EVENT;
 
 		if (event.getEntity() instanceof Player p) {
 			if (p.isCreative())
-				return;
+				return CONTINUE_EVENT;
 		}
+		
+		
+		LevelAccessor level = event.getLevel();
+		BlockPos pos = event.getPos();
+		Block block = event.getPlacedBlock().getBlock();
 
 		if (block == Blocks.FIRE) {
 			if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_FIRE)) {
-				if (event.isCancelable()) {
-					event.setCanceled(true);
-				}
+				doFailureEffects(event.getEntity(), pos);
+				return CANCEL_EVENT;
 			}
 		}
 
 		if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_BREAKING)) {
 			if (Utility.isProtectableBlock(event.getState())) {
-				if (event.isCancelable()) {
-					if (event.getEntity() instanceof ServerPlayer sp) {
-						Utility.updateHands( sp);
-					}
-					doFailureEffects(event.getEntity(), event.getPos());
-					event.setCanceled(true);
+				if (event.getEntity() instanceof ServerPlayer sp) {
+					Utility.updateHands(sp);
 				}
+				doFailureEffects(event.getEntity(), event.getPos());
+				return CANCEL_EVENT;
 			}
 		}
-
+		
+		return CONTINUE_EVENT;
 	}
 
 	@SubscribeEvent
-	public static void onBreakBlock(BreakEvent event) {
+	public static boolean onBreakBlock(BreakEvent event) {
 
-		if (event.getPlayer().level().getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakingTicks())
-			return;
+		if (event.getPlayer().isCreative())
+			return CONTINUE_EVENT;
 
 		ServerPlayer sp = (ServerPlayer) event.getPlayer();
-		if (sp.isCreative())
-			return;
-
 		ServerLevel serverLevel = (ServerLevel) sp.level();
 
-		if (Utility.insideProtectedStructure((LevelAccessor) serverLevel, event.getPos(), Utility.DAMAGE_BREAKING)
-				&& event.isCancelable()) {
+		if (serverLevel.getChunk(event.getPos()).getInhabitedTime() > MyConfig.getStopBreakingTicks())
+			return CONTINUE_EVENT;
+
+
+
+		if (Utility.insideProtectedStructure((LevelAccessor) serverLevel, event.getPos(), Utility.DAMAGE_BREAKING)				) {
 			doFailureEffects(sp, event.getPos());
-			event.setCanceled(true);
+			event.setResult(Result.DENY);
+			return CANCEL_EVENT;
+			
+
 		}
+		return CONTINUE_EVENT;
+		
 	}
 
 	@SubscribeEvent
-	public static void onBreakingSpeed(BreakSpeed event) {
+	public static boolean onBreakingSpeed(BreakSpeed event) {
+		
 		// note: This is both server and clientside. client uses to display properly.
 		if (event.getEntity() == null) {
-			return;
+			return CONTINUE_EVENT;
 		} else if (event.getEntity().isCreative()) {
-			return;
+			return CONTINUE_EVENT;
 		} else if (!(event.getPosition().isPresent())) {
-			return;
+			return CONTINUE_EVENT;
 		}
 		BlockPos ePos = event.getPosition().get();
 		Player p = event.getEntity();
@@ -212,12 +206,12 @@ public class BlockEvents {
 
 		// Temp Hack
 		if (level.isClientSide()) {
-			return;
+			return CONTINUE_EVENT;
 		}
 
 		long gameTime = ((Level) level).getGameTime();
 		if (level.getChunk(ePos).getInhabitedTime() > MyConfig.getStopBreakingTicks())
-			return;
+			return CONTINUE_EVENT;
 
 		if ((Utility.insideProtectedStructure(level, ePos, Utility.DAMAGE_BREAKING))) {
 			if (cGameTime < gameTime) {
@@ -225,6 +219,7 @@ public class BlockEvents {
 				doFailureEffects(p, ePos);
 			}
 		}
+		return CONTINUE_EVENT;
 
 	}
 
@@ -244,13 +239,13 @@ public class BlockEvents {
 	}
 
 	@SubscribeEvent
-	public static void onNeighborNotifyEvent(BlockEvent.NeighborNotifyEvent event) {
+	public static boolean onNeighborNotifyEvent(BlockEvent.NeighborNotifyEvent event) {
 
-		if (event.getState().getBlock() != Blocks.FIRE) {
-			return;
-		}
+		if (event.getState().getBlock() != Blocks.FIRE) 
+			return CONTINUE_EVENT;
+
 		if (event.getLevel().getChunk(new BlockPos(event.getPos())).getInhabitedTime() > MyConfig.getStopFireTicks())
-			return;
+			return CONTINUE_EVENT;
 
 		LevelAccessor level = event.getLevel();
 		BlockPos ePos = event.getPos();
@@ -258,17 +253,20 @@ public class BlockEvents {
 
 		Utility.debugMsg(1, pos, "Neighbor Notify Event");
 		for (Direction d : event.getNotifiedSides()) {
-			Utility.debugMsg(2, d.getName() + " " + d.getUnitVec3i()+ ", ");
+			Utility.debugMsg(2, d.getName() + " " + d.getUnitVec3i() + ", ");
 			BlockPos dpos = pos.relative(d);
 			if (level.getBlockState(dpos).isFlammable(level, pos, d.getOpposite())) {
 				Utility.debugMsg(2, ", is flammable");
 				if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_FIRE)) {
 					Utility.debugMsg(2, d.getName() + ", and is protected.");
-					WorldTickHandler.addFirePos(pos); // TODO: by dimension later, TODO: Should this be dpos ?
+					WorldTickHandler.addFirePos(pos); // TODO: by dimension later?
 					WorldTickHandler.addFirePos(dpos);
-					return;
+					return CONTINUE_EVENT;  // this is an odd one.  didn't cancel before either.
+
 				}
 			}
 		}
+		return CONTINUE_EVENT;
+
 	}
 }

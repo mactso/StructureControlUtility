@@ -13,7 +13,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber()
@@ -29,7 +29,7 @@ public class LivingUpdateHandler {
 		ServerPlayer sp = (ServerPlayer) e;
 		if (sp.isCreative()) return;
 		
-		ServerLevel sl = sp.serverLevel();
+		ServerLevel sl = sp.level();
 		String key = StructureManager.insideStructure(sl, sp.blockPosition());
 		
 		if (key == null) return;
