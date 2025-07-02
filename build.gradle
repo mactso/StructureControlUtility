@@ -6,10 +6,10 @@ plugins {
 }
 
 version = mod_version
-group = mod_group
+group = mod_group_id
 
 base {
-    archivesName = archive_name
+    archivesName = mod_id
 }
 
 // Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
@@ -26,7 +26,7 @@ minecraft {
     // Additional setup is needed to use their mappings: https://parchmentmc.org/docs/getting-started
     //
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: "${mappings_channel}", version: "${mappings_version}"
+    mappings channel: mapping_channel, version: mapping_version
 
     // Forge 1.20.6 and newer use official mappings at runtime, so we shouldn't reobf from official to SRG
     reobf = false
@@ -64,12 +64,14 @@ minecraft {
             // "SCAN": For mods scan.
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
+//            property 'forge.logging.markers', 'REGISTRIES'
 
             property 'forge.logging.console.level', 'debug'
 
             // Recommended for development - enables more descriptive errors at the cost of slower startup and registration.
             property 'eventbus.api.strictRuntimeChecks', 'true'
+
+//            arg "-mixin.config=${mod_id}.mixins.json"
         }
 
         client {
@@ -138,7 +140,7 @@ dependencies {
     // The "userdev" classifier will be requested and setup by ForgeGradle.
     // If the group id is "net.minecraft" and the artifact id is one of ["client", "server", "joined"],
     // then special handling is done to allow a setup of a vanilla dependency without the use of an external repository.
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     // Forge 1.21.6+ uses EventBus 7, which shifts most of its runtime validation to compile-time via an annotation processor
     // to improve performance in production environments. This line is required to enable said compile-time validation
@@ -163,14 +165,15 @@ dependencies {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar) {
-    archiveAppendix = "${mc_version}"
+    archiveAppendix = "${minecraft_version}"
     manifest {
         attributes([
             "Implementation-Title": archivesBaseName,
             "Implementation-Version": version,
-            "Implementation-Vendor" : "lupicus",
+            "Implementation-Vendor" : "mactso",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
+//        attributes['MixinConfigs'] = "${mod_id}.mixins.json"
     }
 }
 
