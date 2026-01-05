@@ -3,7 +3,7 @@ package com.mactso.structurecontrolutility.events;
 import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mactso.structurecontrolutility.managers.StructureManager;
 import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
@@ -35,7 +35,7 @@ public class LivingUpdateHandler {
 		if (key == null) return;
 
 		StructureItem si = StructureManager.getStructureItemOrDefault(key);
-		int debug = 4;
+		// int debug = 4;
 		ChunkAccess chunk = sl.getChunk(sp.blockPosition());
 		long ageInTicks = chunk.getInhabitedTime();
 
@@ -57,7 +57,7 @@ public class LivingUpdateHandler {
 		
 		if (intensity == 0) return;
 		
-		Utility.updateEffect(e, intensity - 1, me,	Utility.FOUR_SECONDS);	
+		MyUtility.updateEffect(e, intensity - 1, me,	MyUtility.FOUR_SECONDS);	
 	}
 	
 }

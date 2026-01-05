@@ -22,7 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
@@ -51,7 +51,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.Tags;
 
-public class Utility {
+public class MyUtility {
 
 	public static List<String> unprotectedStructures = Arrays.asList("minecraft:mineshaft", "minecraft:mineshaft_mesa",
 			"minecraft:trail_ruins", "minecraft:village_desert", "minecraft:village_plains",
@@ -157,7 +157,7 @@ public class Utility {
 
 				StructureStart structurestart = istructurereader.getStartForStructure(entry.getKey());
 
-				ResourceLocation key = structRegistry.getKey(entry.getKey());
+				Identifier key = structRegistry.getKey(entry.getKey());
 
 				StructureItem si = StructureManager.getStructureItemOrDefault(key.toString());
 

@@ -15,17 +15,16 @@ import org.apache.logging.log4j.Logger;
 
 import com.mactso.structurecontrolutility.Main;
 import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -49,6 +48,7 @@ public class StructureManager {
 		int stopFireMinutes;
 		int stopBreakingMinutes;
 		int stopExplosionsMinutes;
+		@SuppressWarnings("unused")
 		int addcount = 0;
 		int linecount = 0;
 
@@ -117,7 +117,7 @@ public class StructureManager {
 
 					lastgoodline = lineNumber;
 
-					Utility.debugMsg(1, lineNumber + ", " + lastgoodline + ", " + modAndStructure + ",  " + effectFlags
+					MyUtility.debugMsg(1, lineNumber + ", " + lastgoodline + ", " + modAndStructure + ",  " + effectFlags
 							+ ",  " + stopFireMinutes + ", " + stopBreakingMinutes + ", " + stopExplosionsMinutes);
 					errorField = "get Structure Item";
 					StructureItem si = new StructureItem(lineNumber, effectFlags, effectMinutes, stopFireMinutes,
@@ -128,13 +128,13 @@ public class StructureManager {
 					addcount++;
 
 				} catch (Exception e) {
-					Utility.debugMsg(0, Main.MODID + " Error reading field " + errorField + " on " + linecount
+					MyUtility.debugMsg(0, Main.MODID + " Error reading field " + errorField + " on " + linecount
 							+ "th line of Structures.csv.");
 				}
 			}
 			input.close();
 		} catch (Exception e) {
-			Utility.debugMsg(0,
+			MyUtility.debugMsg(0,
 					"Warning Structures.csv not found in subdirectory config/structurecontrolutility.  Using default values");
 
 		}
@@ -146,7 +146,7 @@ public class StructureManager {
 	// Possible issue:  If Structure boundaries can overlap will only get the 1st structure.
 	public static String insideStructure(LevelAccessor level, BlockPos pos) {
 		ChunkAccess chunk = level.getChunk(pos);
-		BlockState bs = level.getBlockState(pos);
+		// BlockState bs = level.getBlockState(pos);
 
 		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
@@ -160,7 +160,7 @@ public class StructureManager {
 						ChunkPos.getZ(packedChunkCoordinates), ChunkStatus.STRUCTURE_STARTS);
 				StructureStart structurestart = istructurereader.getStartForStructure(entry.getKey());
 				if (structurestart.getBoundingBox().isInside(pos)) {
-					ResourceLocation key = structRegistry.getKey(entry.getKey());
+					Identifier key = structRegistry.getKey(entry.getKey());
 					return key.toString();
 				}
 			}
@@ -176,7 +176,7 @@ public class StructureManager {
 
 		// Issue: User accidentally deleted line with a structure.
 		if (si == null) {
-			if (Utility.unprotectedStructures.contains(key)) {
+			if (MyUtility.unprotectedStructures.contains(key)) {
 				si = defaultUnprotectedStructureItem;
 			} else {
 				si = defaultProtectedStructureItem;
@@ -219,25 +219,25 @@ public class StructureManager {
 			this.stopExplosionsMinutes = stopExplosionsMinutes;
 			
 			// derived values
-			this.effectTicks = effectMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopFireTicks = stopFireMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopBreakingTicks = stopBreakingMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopExplosionsTicks = stopExplosionsMinutes * Utility.TICKS_PER_MINUTE;
+			this.effectTicks = effectMinutes * MyUtility.TICKS_PER_MINUTE;
+			this.stopFireTicks = stopFireMinutes * MyUtility.TICKS_PER_MINUTE;
+			this.stopBreakingTicks = stopBreakingMinutes * MyUtility.TICKS_PER_MINUTE;
+			this.stopExplosionsTicks = stopExplosionsMinutes * MyUtility.TICKS_PER_MINUTE;
 			
 		}
 
 
 		private void setEffectsValues(String s) {
-			jumpBoost = Integer.valueOf(s.substring(Utility.JUMP_BOOST,1));
-			nightVision = Integer.valueOf(s.substring(Utility.MOVEMENT_SLOWNESS,1));
+			jumpBoost = Integer.valueOf(s.substring(MyUtility.JUMP_BOOST,1));
+			nightVision = Integer.valueOf(s.substring(MyUtility.MOVEMENT_SLOWNESS,1));
 			if (nightVision > 1)
 				nightVision = 1;
-			regeneration = Integer.valueOf(s.substring(Utility.REGENERATION,1));
-			slowFalling = Integer.valueOf(s.substring(Utility.SLOW_FALLING,1));
-			waterBreathing = Integer.valueOf(s.substring(Utility.WATER_BREATHING,1));
+			regeneration = Integer.valueOf(s.substring(MyUtility.REGENERATION,1));
+			slowFalling = Integer.valueOf(s.substring(MyUtility.SLOW_FALLING,1));
+			waterBreathing = Integer.valueOf(s.substring(MyUtility.WATER_BREATHING,1));
 			if (waterBreathing > 1)
 				waterBreathing = 1;
-			weakness = Integer.valueOf(s.substring(Utility.WEAKNESS,1));
+			weakness = Integer.valueOf(s.substring(MyUtility.WEAKNESS,1));
 		}
 
 		public boolean hasEffects() {

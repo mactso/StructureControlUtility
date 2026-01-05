@@ -3,7 +3,7 @@ package com.mactso.structurecontrolutility.config;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.mactso.structurecontrolutility.Main;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
@@ -80,7 +80,7 @@ public class MyConfig {
 	}	
 
 	public static void pushDebugValue() {
-		Utility.debugMsg(1, "Structure Control Utility Debug Level:"+MyConfig.debugLevel);
+		MyUtility.debugMsg(1, "Structure Control Utility Debug Level:"+MyConfig.debugLevel);
 		COMMON.debugLevel.set( MyConfig.debugLevel);
 	}
 

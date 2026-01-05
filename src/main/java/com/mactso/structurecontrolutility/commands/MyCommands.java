@@ -3,7 +3,7 @@ package com.mactso.structurecontrolutility.commands;
 import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mactso.structurecontrolutility.managers.StructureManager;
 import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 
@@ -13,12 +13,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
-public class ModCommands {
+
+public class MyCommands {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("structurecontrolutility").requires((source) -> {
-			return source.hasPermission(2);
-		}).then(Commands.literal("setDebugLevel")
+		dispatcher.register(Commands.literal("structurecontrolutility").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)).then(Commands.literal("setDebugLevel")
 				.then(Commands.argument("debugLevel", IntegerArgumentType.integer(0, 2)).executes(ctx -> {
 					return setDebugLevel(IntegerArgumentType.getInteger(ctx, "debugLevel"));
 				}))).then(Commands.literal("info").executes(ctx -> {
@@ -37,18 +36,18 @@ public class ModCommands {
 
 	public static int doReport(ServerPlayer sp) {
 
-		Utility.sendChat( sp, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		MyUtility.sendChat( sp, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
 		String key = StructureManager.insideStructure(sp.level(), sp.blockPosition());
 		if (key == null) {
-			Utility.sendChat( sp, "You are not inside a Structure.", ChatFormatting.GREEN);
+			MyUtility.sendChat( sp, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
 		ChunkAccess chunk = sp.level().getChunk(sp.blockPosition());
 
 		long ageInTicks = chunk.getInhabitedTime();
-		long ageInMinutes = ageInTicks / Utility.TICKS_PER_MINUTE;
+		long ageInMinutes = ageInTicks / MyUtility.TICKS_PER_MINUTE;
 		String chatMessage = "";
 
 		if (key != null) {
@@ -77,7 +76,7 @@ public class ModCommands {
 			}
 
 		}
-		Utility.sendChat( sp, chatMessage, ChatFormatting.GREEN);
+		MyUtility.sendChat( sp, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

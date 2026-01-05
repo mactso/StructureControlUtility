@@ -5,11 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -20,7 +17,7 @@ import net.minecraftforge.common.world.ModifiableStructureInfo.StructureInfo.Bui
 import net.minecraftforge.event.server.ServerStartingEvent;
 
 public class StructureData {
-	private static final Logger LOGGER = LogManager.getLogger();
+	// private static final Logger LOGGER = LogManager.getLogger();
 
 	static int reportlinenumber = 0;
 
@@ -39,7 +36,7 @@ public class StructureData {
 
 	public static void onStructure(Holder<Structure> struct, Builder builder) {
 
-		String threadname = Thread.currentThread().getName();
+		// String threadname = Thread.currentThread().getName();
 
 		// no processing at load time.
 
@@ -91,7 +88,7 @@ public class StructureData {
 			// otherwise use the default protection time.
 
 			String effectFlags = "Effects:000000";
-			if (Utility.unprotectedStructures.contains(modAndStructure)) {
+			if (MyUtility.unprotectedStructures.contains(modAndStructure)) {
 				stopFireMinutes = 0;
 				stopBreakingMinutes = 0;
 				stopExplosionsMinutes = 0;

@@ -1,14 +1,11 @@
 // 
 package com.mactso.structurecontrolutility;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.mactso.structurecontrolutility.commands.ModCommands;
+import com.mactso.structurecontrolutility.commands.MyCommands;
 import com.mactso.structurecontrolutility.config.MyConfig;
 import com.mactso.structurecontrolutility.managers.StructureManager;
 import com.mactso.structurecontrolutility.util.StructureData;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -23,13 +20,13 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class Main {
 
 	    public static final String MODID = "structurecontrolutility"; 
-		private static final Logger LOGGER = LogManager.getLogger();
+		// private static final Logger LOGGER = LogManager.getLogger();
 	    
 	    public Main(FMLJavaModLoadingContext context)
 	    {
 			context.registerConfig(ModConfig.Type.COMMON, MyConfig.COMMON_SPEC);
 	        FMLCommonSetupEvent.getBus(context.getModBusGroup()).addListener(this::handleCommonSetup);
-	    	Utility.debugMsg(0,MODID + ": Registering Mod.");
+	    	MyUtility.debugMsg(0,MODID + ": Registering Mod.");
 			
 	    }
 
@@ -44,8 +41,8 @@ public class Main {
 	    {
 			@SubscribeEvent 		
 			public static void onCommandsRegistry(final RegisterCommandsEvent event) {
-				Utility.debugMsg(0,MODID+": Registering Command Dispatcher");
-				ModCommands.register(event.getDispatcher());			
+				MyUtility.debugMsg(0,MODID+": Registering Command Dispatcher");
+				MyCommands.register(event.getDispatcher());			
 			}
 			
 			@SubscribeEvent

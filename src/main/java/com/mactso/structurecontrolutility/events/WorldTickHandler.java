@@ -27,16 +27,16 @@ public class WorldTickHandler {
 			firePosList.clear();
 		}
 		for (BlockPos pos : workFirePosList) {
-			if (event.level.getBlockState(pos).getBlock() == Blocks.FIRE) {
-				event.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+			if (event.level().getBlockState(pos).getBlock() == Blocks.FIRE) {
+				event.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 			}
 		}
 
 		synchronized (lavaPosList)
 		{
 			for (BlockPos pos : lavaPosList) {
-				if (event.level.getBlockState(pos).getBlock() == Blocks.LAVA) {
-					event.level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+				if (event.level().getBlockState(pos).getBlock() == Blocks.LAVA) {
+					event.level().setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
 				}
 			}
 			lavaPosList.clear();

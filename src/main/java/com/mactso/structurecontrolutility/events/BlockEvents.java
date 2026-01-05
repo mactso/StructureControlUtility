@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mactso.structurecontrolutility.Main;
 import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.utility.MyUtility;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
@@ -49,6 +49,7 @@ public class BlockEvents {
 	static boolean CANCEL_EVENT = true;
 	static boolean CONTINUE_EVENT = false;
 	
+	@SuppressWarnings("unused")
 	private static void doFailureEffects(Entity e) {
 		doFailureEffects(e, e.blockPosition());
 	}
@@ -104,7 +105,7 @@ public class BlockEvents {
 			return CONTINUE_EVENT;
 		}
 
-		if (!(Utility.insideProtectedStructure(sp.level(), sp.blockPosition(), Utility.DAMAGE_FIRE))) {
+		if (!(MyUtility.insideProtectedStructure(sp.level(), sp.blockPosition(), MyUtility.DAMAGE_FIRE))) {
 			return CONTINUE_EVENT;
 		}
 
@@ -144,16 +145,16 @@ public class BlockEvents {
 		Block block = event.getPlacedBlock().getBlock();
 
 		if (block == Blocks.FIRE) {
-			if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_FIRE)) {
+			if (MyUtility.insideProtectedStructure(level, pos, MyUtility.DAMAGE_FIRE)) {
 				doFailureEffects(event.getEntity(), pos);
 				return CANCEL_EVENT;
 			}
 		}
 
-		if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_BREAKING)) {
-			if (Utility.isProtectableBlock(event.getState())) {
+		if (MyUtility.insideProtectedStructure(level, pos, MyUtility.DAMAGE_BREAKING)) {
+			if (MyUtility.isProtectableBlock(event.getState())) {
 				if (event.getEntity() instanceof ServerPlayer sp) {
-					Utility.updateHands(sp);
+					MyUtility.updateHands(sp);
 				}
 				doFailureEffects(event.getEntity(), event.getPos());
 				return CANCEL_EVENT;
@@ -177,7 +178,7 @@ public class BlockEvents {
 
 
 
-		if (Utility.insideProtectedStructure((LevelAccessor) serverLevel, event.getPos(), Utility.DAMAGE_BREAKING)				) {
+		if (MyUtility.insideProtectedStructure((LevelAccessor) serverLevel, event.getPos(), MyUtility.DAMAGE_BREAKING)				) {
 			doFailureEffects(sp, event.getPos());
 			event.setResult(Result.DENY);
 			return CANCEL_EVENT;
@@ -213,7 +214,7 @@ public class BlockEvents {
 		if (level.getChunk(ePos).getInhabitedTime() > MyConfig.getStopBreakingTicks())
 			return CONTINUE_EVENT;
 
-		if ((Utility.insideProtectedStructure(level, ePos, Utility.DAMAGE_BREAKING))) {
+		if ((MyUtility.insideProtectedStructure(level, ePos, MyUtility.DAMAGE_BREAKING))) {
 			if (cGameTime < gameTime) {
 				cGameTime = gameTime + 10 + rand.nextInt(20);
 				doFailureEffects(p, ePos);
@@ -232,7 +233,7 @@ public class BlockEvents {
 		for (ListIterator<BlockPos> iter = list.listIterator(list.size()); iter.hasPrevious();) {
 			BlockPos tPos = iter.previous();
 			// System.out.println ("Checking :" + tPos);
-			if (Utility.insideProtectedStructure(level, tPos, Utility.DAMAGE_EXPLODING)) {
+			if (MyUtility.insideProtectedStructure(level, tPos, MyUtility.DAMAGE_EXPLODING)) {
 				iter.remove();
 			}
 		}
@@ -251,14 +252,14 @@ public class BlockEvents {
 		BlockPos ePos = event.getPos();
 		MutableBlockPos pos = new MutableBlockPos(ePos.getX(), ePos.getY(), ePos.getZ());
 
-		Utility.debugMsg(1, pos, "Neighbor Notify Event");
+		MyUtility.debugMsg(1, pos, "Neighbor Notify Event");
 		for (Direction d : event.getNotifiedSides()) {
-			Utility.debugMsg(2, d.getName() + " " + d.getUnitVec3i() + ", ");
+			MyUtility.debugMsg(2, d.getName() + " " + d.getUnitVec3i() + ", ");
 			BlockPos dpos = pos.relative(d);
 			if (level.getBlockState(dpos).isFlammable(level, pos, d.getOpposite())) {
-				Utility.debugMsg(2, ", is flammable");
-				if (Utility.insideProtectedStructure(level, pos, Utility.DAMAGE_FIRE)) {
-					Utility.debugMsg(2, d.getName() + ", and is protected.");
+				MyUtility.debugMsg(2, ", is flammable");
+				if (MyUtility.insideProtectedStructure(level, pos, MyUtility.DAMAGE_FIRE)) {
+					MyUtility.debugMsg(2, d.getName() + ", and is protected.");
 					WorldTickHandler.addFirePos(pos); // TODO: by dimension later?
 					WorldTickHandler.addFirePos(dpos);
 					return CONTINUE_EVENT;  // this is an odd one.  didn't cancel before either.
