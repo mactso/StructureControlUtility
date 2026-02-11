@@ -1,12 +1,12 @@
-package com.mactso.structurecontrolutility.commands;
+package common.command;
 
-import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.managers.StructureManager;
-import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
-import com.mactso.structurecontrolutility.utility.Utility;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 
+import common.command.utilities.MyUtilities;
+import common.config.MyConfig;
+import common.managers.StructureManager;
+import common.managers.StructureManager.StructureItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
-public class ModCommands {
+public class MyCommands {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("structurecontrolutility").requires((source) -> {
@@ -38,18 +38,18 @@ public class ModCommands {
 
 	public static int doReport(ServerPlayer p) {
 
-		Utility.sendChat((Player) p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		MyUtilities.sendChat((Player) p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
 		String key = StructureManager.insideStructure(p.serverLevel(), p.blockPosition());
 		if (key == null) {
-			Utility.sendChat((Player) p, "You are not inside a Structure.", ChatFormatting.GREEN);
+			MyUtilities.sendChat((Player) p, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
 		ChunkAccess chunk = p.serverLevel().getChunk(p.blockPosition());
 
 		long ageInTicks = chunk.getInhabitedTime();
-		long ageInMinutes = ageInTicks / Utility.TICKS_PER_MINUTE;
+		long ageInMinutes = ageInTicks / MyUtilities.TICKS_PER_MINUTE;
 		String chatMessage = "";
 
 		if (key != null) {
@@ -78,7 +78,7 @@ public class ModCommands {
 			}
 
 		}
-		Utility.sendChat((Player) p, chatMessage, ChatFormatting.GREEN);
+		MyUtilities.sendChat((Player) p, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

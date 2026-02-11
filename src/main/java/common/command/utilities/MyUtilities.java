@@ -1,4 +1,4 @@
-package com.mactso.structurecontrolutility.utility;
+package common.command.utilities;
 
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -9,12 +9,12 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.managers.StructureManager;
-import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
-
+import common.config.MyConfig;
+import common.managers.StructureManager;
+import common.managers.StructureManager.StructureItem;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import modloader.main.Main;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -53,7 +53,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraftforge.common.Tags;
 
-public class Utility {
+public class MyUtilities {
 
 	public static List<String> unprotectedStructures = Arrays.asList("minecraft:mineshaft", "minecraft:mineshaft_mesa",
 			"minecraft:trail_ruins", "minecraft:village_desert", "minecraft:village_plains",
@@ -85,7 +85,7 @@ public class Utility {
 	public static void debugMsg(int level, String dMsg) {
 
 		if (MyConfig.getDebugLevel() > level - 1) {
-			LOGGER.info("L" + level + ":" + dMsg);
+			LOGGER.info(Main.MODID + " L" + level + ":" + dMsg);
 		}
 
 	}
@@ -146,7 +146,6 @@ public class Utility {
 
 		Optional<Registry<Structure>> opt = level.registryAccess().registry(Registries.STRUCTURE);
 		if (opt.isEmpty()) {
-			int debug = 3;
 		}
 		Registry<Structure> structRegistry = opt.get();
 
