@@ -9,8 +9,7 @@ version = mod_version
 group = mod_group
 
 base {
-    archivesName = archive_name
-        archivesName = "forge_21.6_" + mod_id +"_CC"
+    archivesName = "forge_21.6_" + mod_id +"_CC"
 }
 
 // Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
@@ -164,7 +163,7 @@ dependencies {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar) {
-    archiveAppendix = "${mc_version}"
+//    archiveAppendix = "${mc_version}"
     manifest {
         attributes([
             "Implementation-Title": archivesBaseName,
