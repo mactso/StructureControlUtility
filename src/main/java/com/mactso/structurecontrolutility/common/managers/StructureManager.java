@@ -1,4 +1,4 @@
-package com.mactso.structurecontrolutility.managers;
+package com.mactso.structurecontrolutility.common.managers;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -7,15 +7,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mactso.structurecontrolutility.Main;
-import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.utility.Utility;
+import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+import com.mactso.structurecontrolutility.modloader.main.Main;
 
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -25,12 +24,29 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-
+/**
+ * Manages structure definitions and their associated effect rules.
+ *
+ * <p>Responsibilities:
+ * <ul>
+ *     <li>Load structure data from `Structures.csv`.</li>
+ *     <li>Provide default protection values for unregistered structures.</li>
+ *     <li>Track per-structure effect durations, protections, and potion amplifiers.</li>
+ *     <li>Determine if a position is inside a structure.</li>
+ *     <li>Support multiple potion effects including Mining Fatigue (configurable duration and amplifier).</li>
+ * </ul>
+ *
+ * <p>Notes:
+ * <ul>
+ *     <li>Static defaults are initialized at startup using the current config values.</li>
+ *     <li>Parsing is robust: malformed lines are logged but do not break startup.</li>
+ *     <li>Derived values (ticks) are precomputed for efficiency.</li>
+ * </ul>
+ */
 public class StructureManager {
 
 	public static Map<String, StructureItem> structureMap = new HashMap<>();
@@ -39,17 +55,28 @@ public class StructureManager {
 	private static final Logger LOGGER = LogManager.getLogger();
 	static String regex = "[0-9][0-9][0-9][0-9][0-9][0-9]";
 	static Pattern pattern = Pattern.compile(regex);
-	static StructureItem defaultUnprotectedStructureItem = new StructureItem(0, "000000", 0, 0, 0, 0);
-	static StructureItem defaultProtectedStructureItem = new StructureItem(0, "000000", MyConfig.getEffectsMinutes(), MyConfig.getStopFireMinutes(), MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes());	
+	static StructureItem defaultUnprotectedStructureItem = 
+		    new StructureItem(0, "000000", 0, 0, 0, 0, 0, 0);
+
+		static StructureItem defaultProtectedStructureItem = 
+		    new StructureItem(0, "000000", MyConfig.getEffectsMinutes(), MyConfig.getStopFireMinutes(), 
+		                      MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes(), MyConfig.getMiningFatigueMinutes(), MyConfig.getMiningFatigueLevel());
+
+
 	public static void structureInit() {
 		int lineNumber;
+		int loadedCount = 0;
 		String modAndStructure = "";
 		String effectFlags;
 		int effectMinutes;
 		int stopFireMinutes;
 		int stopBreakingMinutes;
 		int stopExplosionsMinutes;
-		int addcount = 0;
+		int miningFatigueMinutes;   // number of minutes the effect lasts
+		int miningFatigueAmplifier;     // amplifier, 0 = off, max 4
+
+		
+
 		int linecount = 0;
 
 		String errorField = "first";
@@ -62,28 +89,39 @@ public class StructureManager {
 				new FileInputStream("config/structurecontrolutility/structures.csv"))) {
 			BufferedReader br = new BufferedReader(input);
 			while ((line = br.readLine()) != null) {
-				if (line.isEmpty() ) {
+				if (line.isEmpty()) {
 					continue;
 				}
-				if (line.equals("") ) {
+				if (line.equals("")) {
 					continue;
-				}	
+				}
 
 				if (line.charAt(0) == '*') {
 					continue;
 				}
-				StringTokenizer st = new StringTokenizer(line, ",");
+				
 				linecount++;
+				
+
 				try {
+					String[] parts = line.split(",", -1); // preserve empty fields
+
+					// Check field count
+					if (parts.length < 9) {
+						MyUtilities.debugMsg(1,
+								Main.MODID + "Line# " + linecount + " Bad line in Structures.csv (not enough fields): "
+										+ line + "\". Skipping this line.");
+						continue; // skip this line, process the rest
+					}
+
 					errorField = "linenumber";
-					lineNumber = Integer.parseInt(st.nextToken().trim());
+					lineNumber = Integer.parseInt(parts[0].trim());
 
 					errorField = "modAndStructure";
-					modAndStructure = st.nextToken().trim();
-					String key = modAndStructure;
+					modAndStructure = parts[1].trim();
 
 					errorField = "effectFlags";
-					effectFlags = st.nextToken().trim();
+					effectFlags = parts[2].trim();
 
 					if (effectFlags.length() != 14) {
 						LOGGER.error(modAndStructure + " effects string of '" + effectFlags
@@ -92,49 +130,55 @@ public class StructureManager {
 					}
 
 					effectFlags = effectFlags.substring(8);
-					
+
 					if (!pattern.matcher(effectFlags).matches()) {
 						LOGGER.error(modAndStructure + " effects string of '" + effectFlags
 								+ "' in Structures.csv has non numeric digits.  It was set to 000000.");
 						effectFlags = "000000";
 					}
+
 					errorField = "effectMinutes";
-					String token = st.nextToken().trim();
-					effectMinutes = Integer.parseInt(token);
-					
-					
+					effectMinutes = Integer.parseInt(parts[3].trim());
+
 					errorField = "stopFireMinutes";
-					token = st.nextToken().trim();
-					stopFireMinutes = Integer.parseInt(token);
+					stopFireMinutes = Integer.parseInt(parts[4].trim());
 
 					errorField = "stopBreakingMinutes";
-					token = st.nextToken().trim();
-					stopBreakingMinutes = Integer.parseInt(token);
+					stopBreakingMinutes = Integer.parseInt(parts[5].trim());
 
 					errorField = "stopExplosionsMinutes";
-					token = st.nextToken().trim();
-					stopExplosionsMinutes = Integer.parseInt(token);
+					stopExplosionsMinutes = Integer.parseInt(parts[6].trim());
+					
+					errorField = "miningFatigueMinutes";
+					miningFatigueMinutes = Integer.parseInt(parts[7].trim());
+
+					errorField = "miningFatigueAmplifier";
+					miningFatigueAmplifier = Integer.parseInt(parts[8].trim());
+
+					// clamp amplifier
+					if (miningFatigueAmplifier < 1) miningFatigueAmplifier = 1;
+					if (miningFatigueAmplifier > 5) miningFatigueAmplifier = 5;
 
 					lastgoodline = lineNumber;
 
-					Utility.debugMsg(1, lineNumber + ", " + lastgoodline + ", " + modAndStructure + ",  " + effectFlags
-							+ ",  " + stopFireMinutes + ", " + stopBreakingMinutes + ", " + stopExplosionsMinutes);
+					MyUtilities.debugMsg(0, loadedCount + " Loaded: " + modAndStructure + " values successfully.");
+
 					errorField = "get Structure Item";
 					StructureItem si = new StructureItem(lineNumber, effectFlags, effectMinutes, stopFireMinutes,
-							stopBreakingMinutes, stopExplosionsMinutes);
+							stopBreakingMinutes, stopExplosionsMinutes, miningFatigueMinutes, miningFatigueAmplifier);
+
 					errorField = "put Structure Item";
-					structureMap.put(key, si);
-					
-					addcount++;
+					structureMap.put(modAndStructure, si);
+
 
 				} catch (Exception e) {
-					Utility.debugMsg(0, Main.MODID + " Error reading field " + errorField + " on " + linecount
+					MyUtilities.debugMsg(0, Main.MODID + " Error reading field " + errorField + " on " + linecount
 							+ "th line of Structures.csv.");
 				}
 			}
-			input.close();
+			
 		} catch (Exception e) {
-			Utility.debugMsg(0,
+			MyUtilities.debugMsg(0,
 					"Warning Structures.csv not found in subdirectory config/structurecontrolutility.  Using default values");
 
 		}
@@ -143,10 +187,11 @@ public class StructureManager {
 
 	// Structure: BlockPos is inside a structure bounding box.
 	// null: BlockPos is not inside a structure.
-	// Possible issue:  If Structure boundaries can overlap will only get the 1st structure.
+	// Possible issue: If Structure boundaries can overlap will only get the 1st
+	// structure.
 	public static String insideStructure(LevelAccessor level, BlockPos pos) {
 		ChunkAccess chunk = level.getChunk(pos);
-		BlockState bs = level.getBlockState(pos);
+
 
 		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
@@ -176,7 +221,7 @@ public class StructureManager {
 
 		// Issue: User accidentally deleted line with a structure.
 		if (si == null) {
-			if (Utility.unprotectedStructures.contains(key)) {
+			if (MyUtilities.unprotectedStructures.contains(key)) {
 				si = defaultUnprotectedStructureItem;
 			} else {
 				si = defaultProtectedStructureItem;
@@ -187,6 +232,21 @@ public class StructureManager {
 		return si;
 	}
 
+	/**
+	 * Represents a single structure's configuration and derived effect values.
+	 *
+	 * <p>Stores per-structure information including:
+	 * <ul>
+	 *     <li>Line number from the CSV file</li>
+	 *     <li>Effect flags string and individual potion effect intensities</li>
+	 *     <li>Durations for structure protections (fire, breaking, explosions)</li>
+	 *     <li>Mining Fatigue effect duration and amplifier</li>
+	 *     <li>Derived tick counts for each duration for efficient runtime use</li>
+	 * </ul>
+	 *
+	 * <p>Provides helper methods to check for active effects and to access 
+	 * both minute-based and tick-based durations.
+	 */
 	public static class StructureItem {
 		int lineNumber;
 		String effectFlags;
@@ -194,11 +254,15 @@ public class StructureManager {
 		int stopFireMinutes;
 		int stopBreakingMinutes;
 		int stopExplosionsMinutes;
+		int miningFatigueMinutes;   // number of minutes the mining fatigue lasts
+		int miningFatigueAmplifier;     // amplifier, 0 = off, max 4
+		
 		// derived values
 		long effectTicks;
 		long stopFireTicks;
 		long stopBreakingTicks;
 		long stopExplosionsTicks;
+		long miningFatigueTicks;    
 
 		int jumpBoost;
 		int nightVision;
@@ -208,8 +272,8 @@ public class StructureManager {
 		int weakness;
 
 		public StructureItem(int lineNumber, String effectFlags, int effectMinutes, int stopFireMinutes,
-				int stopBreakingMinutes, int stopExplosionsMinutes) {
-			
+				int stopBreakingMinutes, int stopExplosionsMinutes, int miningFatigueMinutes, int rawMiningFatigueAmplifier) {
+
 			this.lineNumber = lineNumber;
 			this.effectFlags = effectFlags;
 			setEffectsValues(effectFlags);
@@ -217,34 +281,38 @@ public class StructureManager {
 			this.stopFireMinutes = stopFireMinutes;
 			this.stopBreakingMinutes = stopBreakingMinutes;
 			this.stopExplosionsMinutes = stopExplosionsMinutes;
+			this.miningFatigueMinutes = miningFatigueMinutes;
+			this.miningFatigueAmplifier = rawMiningFatigueAmplifier - 1;
 			
 			// derived values
-			this.effectTicks = effectMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopFireTicks = stopFireMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopBreakingTicks = stopBreakingMinutes * Utility.TICKS_PER_MINUTE;
-			this.stopExplosionsTicks = stopExplosionsMinutes * Utility.TICKS_PER_MINUTE;
-			
+			this.effectTicks = effectMinutes * MyUtilities.TICKS_PER_MINUTE;
+			this.stopFireTicks = stopFireMinutes * MyUtilities.TICKS_PER_MINUTE;
+			this.stopBreakingTicks = stopBreakingMinutes * MyUtilities.TICKS_PER_MINUTE;
+			this.stopExplosionsTicks = stopExplosionsMinutes * MyUtilities.TICKS_PER_MINUTE;
+			this.miningFatigueTicks = miningFatigueMinutes * MyUtilities.TICKS_PER_MINUTE;
+
 		}
 
-
 		private void setEffectsValues(String s) {
-			jumpBoost = Integer.valueOf(s.substring(Utility.JUMP_BOOST,1));
-			nightVision = Integer.valueOf(s.substring(Utility.MOVEMENT_SLOWNESS,1));
+			jumpBoost = Integer.valueOf(s.substring(MyUtilities.JUMP_BOOST, 1));
+			nightVision = Integer.valueOf(s.substring(MyUtilities.MOVEMENT_SLOWNESS, 1));
 			if (nightVision > 1)
 				nightVision = 1;
-			regeneration = Integer.valueOf(s.substring(Utility.REGENERATION,1));
-			slowFalling = Integer.valueOf(s.substring(Utility.SLOW_FALLING,1));
-			waterBreathing = Integer.valueOf(s.substring(Utility.WATER_BREATHING,1));
+			regeneration = Integer.valueOf(s.substring(MyUtilities.REGENERATION, 1));
+			slowFalling = Integer.valueOf(s.substring(MyUtilities.SLOW_FALLING, 1));
+			waterBreathing = Integer.valueOf(s.substring(MyUtilities.WATER_BREATHING, 1));
 			if (waterBreathing > 1)
 				waterBreathing = 1;
-			weakness = Integer.valueOf(s.substring(Utility.WEAKNESS,1));
+			weakness = Integer.valueOf(s.substring(MyUtilities.WEAKNESS, 1));
 		}
 
 		public boolean hasEffects() {
-			if (this.effectFlags.equals("000000")) {
-				return false;
+
+			if (!this.effectFlags.equals("000000")) {
+				return true;
 			}
-			return true;
+
+			return false;
 		}
 
 		public int getJumpBoostIntensity() {
@@ -283,20 +351,42 @@ public class StructureManager {
 			return stopExplosionsMinutes;
 		}
 
+		public int getMiningFatigueMinutes() {
+			return miningFatigueMinutes;
+		}
+
+		public boolean isMiningFatigue() {
+		    if (miningFatigueMinutes > 0) 
+		    	return true;
+		    return false;
+		}
+		
+		public int getMiningFatigueLevel() {
+			return miningFatigueAmplifier;
+		}
+		
 		// derived values
 		public long getStopBreakingTicks() {
 			return stopBreakingTicks;
 		}
 
-		// derived values
+
 		public long getStopFireTicks() {
 			return stopFireTicks;
 		}
 
-		// derived values
 		public long getStopExplosionsTicks() {
 			return stopExplosionsTicks;
 		}
+
+		
+		public long getMiningFatigueTicks() {
+			return miningFatigueTicks;
+		}
+		
+		
+
+		
 
 	}
 

@@ -1,4 +1,4 @@
-package com.mactso.structurecontrolutility.utility;
+package com.mactso.structurecontrolutility.common.utility;
 
 import java.util.Arrays;
 import java.util.List;
@@ -8,9 +8,10 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.mactso.structurecontrolutility.config.MyConfig;
-import com.mactso.structurecontrolutility.managers.StructureManager;
-import com.mactso.structurecontrolutility.managers.StructureManager.StructureItem;
+import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.managers.StructureManager;
+import com.mactso.structurecontrolutility.common.managers.StructureManager.StructureItem;
+import com.mactso.structurecontrolutility.modloader.main.Main;
 
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -51,7 +52,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraftforge.common.Tags;
 
-public class Utility {
+public class MyUtilities {
 
 	public static List<String> unprotectedStructures = Arrays.asList("minecraft:mineshaft", "minecraft:mineshaft_mesa",
 			"minecraft:trail_ruins", "minecraft:village_desert", "minecraft:village_plains",
@@ -83,13 +84,13 @@ public class Utility {
 	public static void debugMsg(int level, String dMsg) {
 
 		if (MyConfig.getDebugLevel() > level - 1) {
-			LOGGER.info("L" + level + ":" + dMsg);
+			LOGGER.info(Main.MODID + " L" + level + ":" + dMsg);
 		}
 
 	}
 
 	public static void debugMsg(int level, BlockPos pos, String dMsg) {
-
+		
 		if (MyConfig.getDebugLevel() > level - 1) {
 			LOGGER.info("L" + level + " (" + pos.getX() + "," + pos.getY() + "," + pos.getZ() + "): " + dMsg);
 		}
@@ -184,34 +185,36 @@ public class Utility {
 		}
 		return false;
 	}
-
+	
 	/**
 	 * fix client side view of the hotbar for non creative
 	 */
 	public static void updateHands(ServerPlayer player)
-
 	{
+		
 		final int OFF_HAND_SLOT = 45;
 		final int HOT_BAR_SLOT = 36;
 		
 		if (player.connection == null)
 			return;
-
+		
 		if (!player.getInventory().getSelectedItem().isEmpty()) {
 			slotChanged(player, HOT_BAR_SLOT + player.getInventory().getSelectedSlot(), player.getInventory().getSelectedItem());
 		}
+		
 		if (!player.getOffhandItem().isEmpty())
 			slotChanged(player, OFF_HAND_SLOT, player.getOffhandItem());
 	}
-
-	public static void slotChanged(ServerPlayer player, int index, ItemStack itemstack) {
+	
+	public static void slotChanged(ServerPlayer player, int index, ItemStack itemstack)
+	{
 		InventoryMenu menu = player.inventoryMenu;
-		player.connection.send(
-				new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), index, itemstack));
+    	player.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), index, itemstack));
 	}
 
 	public static boolean isProtectableBlock(BlockState bs) {
 
+	
 		if ((bs.getBlock() == Blocks.RAW_GOLD_BLOCK)) {
 			return false;
 		}
@@ -226,6 +229,7 @@ public class Utility {
 			return false;
 		}
 
+		
 		if ((bs.getBlock() == Blocks.RAW_IRON_BLOCK)) {
 			return false;
 		}
@@ -261,7 +265,7 @@ public class Utility {
 		if ((bs.getBlock() == Blocks.RED_MUSHROOM)) {
 			return false;
 		}
-
+		
 		if ((bs.getBlock() == Blocks.EMERALD_BLOCK)) {
 			return false;
 		}
@@ -281,7 +285,7 @@ public class Utility {
 		if ((bs.is(BlockTags.LEAVES))) {
 			return false;
 		}
-
+	
 		if ((bs.is(Tags.Blocks.ORES))) {
 			return false;
 		}
@@ -309,7 +313,7 @@ public class Utility {
 		if ((bs.getBlock() instanceof WebBlock)) {
 			return false;
 		}
-
+		
 		if ((bs.getBlock() instanceof TallGrassBlock)) {
 			return false;
 		}
@@ -354,7 +358,7 @@ public class Utility {
 		if ((bs.getBlock() instanceof VineBlock)) {
 			return false;
 		}
-
+		
 		return true;
 	}
 
