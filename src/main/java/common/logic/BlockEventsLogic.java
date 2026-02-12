@@ -88,7 +88,7 @@ public class BlockEventsLogic {
 	
 	    MyUtilities.debugMsg(1, mPos, "Neighbor Notify Event");
 	    for (Direction d : notifiedSides) {
-	        MyUtilities.debugMsg(2, d.getName() + " " + d.getNormal() + ", ");
+	        MyUtilities.debugMsg(2, d.getName() + " " + d.getUnitVec3i() + ", ");
 	        BlockPos dpos = mPos.relative(d);
 	        if (level.getBlockState(dpos).isFlammable(level, mPos, d.getOpposite())) {
 	            MyUtilities.debugMsg(2, ", is flammable");

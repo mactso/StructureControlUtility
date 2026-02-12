@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -60,7 +59,7 @@ public class StructureManager {
 
 		static StructureItem defaultProtectedStructureItem = 
 		    new StructureItem(0, "000000", MyConfig.getEffectsMinutes(), MyConfig.getStopFireMinutes(), 
-		                      MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes(), 0, 0);
+		                      MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes(), MyConfig.getMiningFatigueMinutes(), MyConfig.getMiningFatigueLevel());
 
 
 	public static void structureInit() {
@@ -193,13 +192,7 @@ public class StructureManager {
 		ChunkAccess chunk = level.getChunk(pos);
 
 
-		Optional<Registry<Structure>> opt = level.registryAccess().registry(Registries.STRUCTURE);
-
-		if (opt.isEmpty()) {
-			return null;
-		}
-
-		Registry<Structure> structRegistry = opt.get();
+		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
 		Set<Entry<Structure, LongSet>> structureReferences = chunk.getAllReferences().entrySet();
 		for (Entry<Structure, LongSet> entry : structureReferences) {

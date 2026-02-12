@@ -11,24 +11,38 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 public class MyCommands {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("structurecontrolutility").requires((source) -> {
-			return source.hasPermission(2);
-		}).then(Commands.literal("setDebugLevel")
-				.then(Commands.argument("debugLevel", IntegerArgumentType.integer(0, 2)).executes(ctx -> {
-					return setDebugLevel(IntegerArgumentType.getInteger(ctx, "debugLevel"));
-				}))).then(Commands.literal("info").executes(ctx -> {
-					ServerPlayer p = ctx.getSource().getPlayerOrException();
-					doReport(p);
-					return 1;
-				})));
-
+		dispatcher.register(
+			Commands.literal("structurecontrolutility")
+				.requires((source) -> {
+					return source.hasPermission(2);
+				}) // requires
+				.then(
+					Commands.literal("setDebugLevel")
+						.then(
+							Commands.argument("debugLevel", IntegerArgumentType.integer(0, 2))
+								.executes(ctx -> {
+									return setDebugLevel(
+										IntegerArgumentType.getInteger(ctx, "debugLevel")
+									);
+								}) // executes
+						) // then debugLevel argument
+				) // then setDebugLevel
+				.then(
+					Commands.literal("info")
+						.executes(ctx -> {
+							ServerPlayer p = ctx.getSource().getPlayerOrException();
+							doReport(p);
+							return 1;
+						}) // executes
+				) // then info
+		); // register
 	}
+
 
 	public static int setDebugLevel(int newDebugLevel) {
 		MyConfig.setDebugLevel(newDebugLevel);
@@ -38,11 +52,11 @@ public class MyCommands {
 
 	public static int doReport(ServerPlayer p) {
 
-		MyUtilities.sendChat((Player) p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		MyUtilities.sendChat(p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
 		String key = StructureManager.insideStructure(p.serverLevel(), p.blockPosition());
 		if (key == null) {
-			MyUtilities.sendChat((Player) p, "You are not inside a Structure.", ChatFormatting.GREEN);
+			MyUtilities.sendChat( p, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
@@ -65,12 +79,17 @@ public class MyCommands {
 			
 			if (si.getStopBreakingMinutes() - ageInMinutes > 0) {
 				chatMessage += "\n It is Protected From Digging for " + (si.getStopBreakingMinutes() - ageInMinutes)
-						+ " minutes.";
+						+ " more minutes.";
 			}
 			
 			if (si.getStopExplosionsMinutes() - ageInMinutes > 0) {
 				chatMessage += "\n It is Protected From Exploding for " + (si.getStopExplosionsMinutes() - ageInMinutes)
-						+ " minutes.";
+						+ " more minutes.";
+			}
+
+			if (si.getMiningFatigueMinutes() - ageInMinutes > 0) {
+				chatMessage += "\n It causes Mining Fatigue: " + si.getMiningFatigueLevel()+ " for " + (si.getStopExplosionsMinutes() - ageInMinutes)
+						+ " more minutes.";
 			}
 			
 			if (chatMessage.length() == len) {
@@ -78,7 +97,7 @@ public class MyCommands {
 			}
 
 		}
-		MyUtilities.sendChat((Player) p, chatMessage, ChatFormatting.GREEN);
+		MyUtilities.sendChat( p, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

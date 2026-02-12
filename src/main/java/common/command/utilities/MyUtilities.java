@@ -1,9 +1,8 @@
 package common.command.utilities;
 
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -22,13 +21,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -50,7 +49,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraftforge.common.Tags;
 
 public class MyUtilities {
@@ -76,7 +74,7 @@ public class MyUtilities {
 
 	public static final int FOUR_SECONDS = 80;
 
-	public static void dbgChatln(Player p, String msg, int level) {
+	public static void dbgChatln(ServerPlayer p, String msg, int level) {
 		if (MyConfig.getDebugLevel() > level - 1) {
 			sendChat(p, msg, ChatFormatting.YELLOW);
 		}
@@ -107,7 +105,7 @@ public class MyUtilities {
 
 	}
 
-	public static void sendBoldChat(Player p, String chatMessage, ChatFormatting textColor) {
+	public static void sendBoldChat(ServerPlayer p, String chatMessage, ChatFormatting textColor) {
 
 		MutableComponent component = Component.literal(chatMessage);
 		component.setStyle(component.getStyle().withBold(true));
@@ -116,11 +114,11 @@ public class MyUtilities {
 
 	}
 
-	public static void sendChat(Player p, String chatMessage) {
+	public static void sendChat(ServerPlayer p, String chatMessage) {
 		sendChat(p, chatMessage, ChatFormatting.DARK_GREEN);
 	}
 
-	public static void sendChat(Player p, String chatMessage, ChatFormatting textColor) {
+	public static void sendChat(ServerPlayer p, String chatMessage, ChatFormatting textColor) {
 
 		MutableComponent component = Component.literal(chatMessage);
 		component.setStyle(component.getStyle().withColor(textColor));
@@ -144,10 +142,7 @@ public class MyUtilities {
 			return false;
 		}
 
-		Optional<Registry<Structure>> opt = level.registryAccess().registry(Registries.STRUCTURE);
-		if (opt.isEmpty()) {
-		}
-		Registry<Structure> structRegistry = opt.get();
+		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
 		Set<Entry<Structure, LongSet>> structureReferences = chunk.getAllReferences().entrySet();
 		for (Entry<Structure, LongSet> entry : structureReferences) {
