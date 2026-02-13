@@ -20,9 +20,10 @@ public class FluidEvents {
 		if (sp.isCreative())
 			return;
 	
-		boolean cancel = ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace(),
-				event);
-		if ((cancel) && event.isCancelable()) event.setCanceled(true); // modloaders may not obey this cancel
+		
+		ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace());
+		
+		return ;
 
 	}
 

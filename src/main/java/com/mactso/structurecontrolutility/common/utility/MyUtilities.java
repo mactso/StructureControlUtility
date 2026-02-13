@@ -63,11 +63,11 @@ public class MyUtilities {
 	public static int DAMAGE_EXPLODING = 2;
 
 	public static int JUMP_BOOST = 0;
-	public static int MOVEMENT_SLOWNESS = 0;
-	public static int REGENERATION = 0;
-	public static int SLOW_FALLING = 0;
-	public static int WATER_BREATHING = 0;
-	public static int WEAKNESS = 0;
+	public static int MOVEMENT_SLOWNESS = 1;
+	public static int REGENERATION = 2;
+	public static int SLOW_FALLING = 3;
+	public static int WATER_BREATHING = 4;
+	public static int WEAKNESS = 5;
 
 	public static int TICKS_PER_MINUTE = 1200;
 

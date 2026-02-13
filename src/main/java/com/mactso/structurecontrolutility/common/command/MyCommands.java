@@ -50,17 +50,17 @@ public class MyCommands {
 		return 1;
 	}
 
-	public static int doReport(ServerPlayer p) {
+	public static int doReport(ServerPlayer sp) {
 
-		MyUtilities.sendChat(p, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
+		MyUtilities.sendChat(sp, "\nStructure Control Info\n", ChatFormatting.DARK_GREEN);
 
-		String key = StructureManager.insideStructure(p.serverLevel(), p.blockPosition());
+		String key = StructureManager.insideStructure(sp.level(), sp.blockPosition());
 		if (key == null) {
-			MyUtilities.sendChat( p, "You are not inside a Structure.", ChatFormatting.GREEN);
+			MyUtilities.sendChat( sp, "You are not inside a Structure.", ChatFormatting.GREEN);
 			return 1;
 		}
 
-		ChunkAccess chunk = p.serverLevel().getChunk(p.blockPosition());
+		ChunkAccess chunk = sp.level().getChunk(sp.blockPosition());
 
 		long ageInTicks = chunk.getInhabitedTime();
 		long ageInMinutes = ageInTicks / MyUtilities.TICKS_PER_MINUTE;
@@ -88,7 +88,7 @@ public class MyCommands {
 			}
 
 			if (si.getMiningFatigueMinutes() - ageInMinutes > 0) {
-				chatMessage += "\n It causes Mining Fatigue: " + si.getMiningFatigueLevel()+ " for " + (si.getStopExplosionsMinutes() - ageInMinutes)
+				chatMessage += "\n It causes Mining Fatigue: " + si.getMiningFatigueAmplifier()+ " for " + (si.getStopExplosionsMinutes() - ageInMinutes)
 						+ " more minutes.";
 			}
 			
@@ -97,7 +97,7 @@ public class MyCommands {
 			}
 
 		}
-		MyUtilities.sendChat( p, chatMessage, ChatFormatting.GREEN);
+		MyUtilities.sendChat( sp, chatMessage, ChatFormatting.GREEN);
 		return 1;
 	}
 }

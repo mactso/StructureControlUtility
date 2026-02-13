@@ -18,51 +18,49 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.event.level.BlockEvent.BreakEvent;
-import net.minecraftforge.event.level.BlockEvent.EntityPlaceEvent;
 
 public class BlockEventsLogic {
 
 	// client side variables.
 	public static long cGameTime = 0;
 	
-	public static void handleBlockPlacement(EntityPlaceEvent event) {
-	    LevelAccessor level = event.getLevel();
-	    BlockPos pos = event.getPos();
-	    Block block = event.getPlacedBlock().getBlock();
+	public static boolean isBlockPlacable( LevelAccessor level, BlockPos pos , Player p, Block block) {
 	
-	    if (event.getEntity() instanceof Player p && p.isCreative()) return;
 	
 	    // Fire protection
 	    if (block == Blocks.FIRE && MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_FIRE)) {
-	        if (event.isCancelable()) event.setCanceled(true);
+			SpecialEffects.doFireFailureEffects(p, pos);
+			return false;
 	    }
 	
 	    // General block protection
 	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING)) {
-	        if (MyUtilities.isProtectableBlock(event.getState())) {
-	            if (event.isCancelable()) {
-	                if (event.getEntity() instanceof ServerPlayer sp) {
+			if (MyUtilities.isProtectableBlock(block.defaultBlockState())) {
+				if (p instanceof ServerPlayer sp) {
 	                    MyUtilities.updateHands(sp);
 	                }
-	                SpecialEffects.doFailureEffects(event.getEntity(), pos);
-	                event.setCanceled(true);
-	            }
+				SpecialEffects.doFailureEffects(p, pos);
+				return false;
 	        }
 	    }
+		
+		return true;
 	}
 
-	public static void handleBlockBreak(ServerPlayer sp, BlockPos pos, BreakEvent event) {
+	public static boolean isProtectBlock(ServerPlayer sp, BlockPos pos, BreakEvent event) {
 	    ServerLevel level = (ServerLevel) sp.level();
 	
-	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING) && event.isCancelable()) {
+	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING) ) {
 	        SpecialEffects.doFailureEffects(sp, pos);
-	        event.setCanceled(true);
+			return true;
 	    }
+		return false; 
 	}
 
 	public static void handleBreakingSpeed(ServerPlayer sp, BlockPos pos) {
 	    LevelAccessor level = sp.level();
-	    if (level.getChunk(pos).getInhabitedTime() > MyConfig.getStopBreakingTicks()) return;
+		if (level.getChunk(pos).getInhabitedTime() > MyConfig.getStopBreakingTicks())
+			return;
 	
 	    RandomSource rand = level.getRandom();
 	    long gameTime = ((Level) level).getGameTime();

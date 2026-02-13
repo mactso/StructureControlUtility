@@ -108,7 +108,7 @@ public class StructureManager {
 
 					// Check field count
 					if (parts.length < 9) {
-						MyUtilities.debugMsg(1,
+						MyUtilities.debugMsg(0,
 								Main.MODID + "Line# " + linecount + " Bad line in Structures.csv (not enough fields): "
 										+ line + "\". Skipping this line.");
 						continue; // skip this line, process the rest
@@ -264,12 +264,12 @@ public class StructureManager {
 		long stopExplosionsTicks;
 		long miningFatigueTicks;    
 
-		int jumpBoost;
-		int nightVision;
-		int regeneration;
-		int slowFalling;
-		int waterBreathing;
-		int weakness;
+		int amplifierJumpBoost;
+		int amplifierNightVision;
+		int amplifierRegeneration;
+		int amplifierSlowFalling;
+		int amplifierWaterBreathing;
+		int amplifierWeakness;
 
 		public StructureItem(int lineNumber, String effectFlags, int effectMinutes, int stopFireMinutes,
 				int stopBreakingMinutes, int stopExplosionsMinutes, int miningFatigueMinutes, int rawMiningFatigueAmplifier) {
@@ -293,17 +293,32 @@ public class StructureManager {
 
 		}
 
+		/*
+		 * Parse the Effects string to initilize the MobEffects amplifiers
+		 */
 		private void setEffectsValues(String s) {
-			jumpBoost = Integer.valueOf(s.substring(MyUtilities.JUMP_BOOST, 1));
-			nightVision = Integer.valueOf(s.substring(MyUtilities.MOVEMENT_SLOWNESS, 1));
-			if (nightVision > 1)
-				nightVision = 1;
-			regeneration = Integer.valueOf(s.substring(MyUtilities.REGENERATION, 1));
-			slowFalling = Integer.valueOf(s.substring(MyUtilities.SLOW_FALLING, 1));
-			waterBreathing = Integer.valueOf(s.substring(MyUtilities.WATER_BREATHING, 1));
-			if (waterBreathing > 1)
-				waterBreathing = 1;
-			weakness = Integer.valueOf(s.substring(MyUtilities.WEAKNESS, 1));
+		    amplifierJumpBoost = parseEffectDigitOrZero(s, MyUtilities.JUMP_BOOST);
+		    
+		    amplifierNightVision = parseEffectDigitOrZero(s, MyUtilities.MOVEMENT_SLOWNESS);
+		    if (amplifierNightVision > 1) amplifierNightVision = 1;
+
+		    amplifierRegeneration = parseEffectDigitOrZero(s, MyUtilities.REGENERATION);
+		    amplifierSlowFalling = parseEffectDigitOrZero(s, MyUtilities.SLOW_FALLING);
+
+		    amplifierWaterBreathing = parseEffectDigitOrZero(s, MyUtilities.WATER_BREATHING);
+		    if (amplifierWaterBreathing > 1) amplifierWaterBreathing = 1;
+
+		    amplifierWeakness = parseEffectDigitOrZero(s, MyUtilities.WEAKNESS);
+		}
+
+		/** 
+		 * Returns the numeric value of the character at the given index,
+		 * or 0 if the character is not a valid digit.
+		 */
+		private int parseEffectDigitOrZero(String s, int index) {
+		    if (index < 0 || index >= s.length()) return 0;
+		    int value = Character.getNumericValue(s.charAt(index));
+		    return value >= 0 ? value : 0;
 		}
 
 		public boolean hasEffects() {
@@ -315,28 +330,28 @@ public class StructureManager {
 			return false;
 		}
 
-		public int getJumpBoostIntensity() {
-			return jumpBoost;
+		public int getJumpBoostAmplifier() {
+			return amplifierJumpBoost;
 		}
 
-		public int getNightVisionIntensity() {
-			return nightVision;
+		public int getNightVisionAmplifier() {
+			return amplifierNightVision;
 		}
 
-		public int getRegenerationIntensity() {
-			return regeneration;
+		public int getRegenerationAmplifier() {
+			return amplifierRegeneration;
 		}
 
-		public int getSlowFallingIntensity() {
-			return slowFalling;
+		public int getSlowFallingAmplifier() {
+			return amplifierSlowFalling;
 		}
 
-		public int getWaterBreathingIntensity() {
-			return waterBreathing;
+		public int getWaterBreathingAmplifier() {
+			return amplifierWaterBreathing;
 		}
 
-		public int getWeaknessIntensity() {
-			return weakness;
+		public int getWeaknessAmplifier() {
+			return amplifierWeakness;
 		}
 
 		public int getStopFireMinutes() {
@@ -361,7 +376,7 @@ public class StructureManager {
 		    return false;
 		}
 		
-		public int getMiningFatigueLevel() {
+		public int getMiningFatigueAmplifier() {
 			return miningFatigueAmplifier;
 		}
 		

@@ -40,21 +40,24 @@ public class PlayerTickLogic {
 		// Mining fatigue
 		if (si.isMiningFatigue() && si.getMiningFatigueTicks() > 
 		ageInTicks) {
-			PlayerTickLogic.helperUpdateEffect(sp, si.getMiningFatigueLevel() - 1, MobEffects.MINING_FATIGUE);
+			PlayerTickLogic.helperUpdateEffect(sp, si.getMiningFatigueAmplifier()+1, MobEffects.MINING_FATIGUE);
 		}
 
 		// Other effects
-		PlayerTickLogic.helperUpdateEffect(sp, si.getJumpBoostIntensity(), MobEffects.JUMP_BOOST);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getNightVisionIntensity(), MobEffects.NIGHT_VISION);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getRegenerationIntensity(), MobEffects.REGENERATION);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getSlowFallingIntensity(), MobEffects.SLOW_FALLING);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getWaterBreathingIntensity(), MobEffects.WATER_BREATHING);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getWeaknessIntensity(), MobEffects.WEAKNESS);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getJumpBoostAmplifier(), MobEffects.JUMP_BOOST);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getNightVisionAmplifier(), MobEffects.NIGHT_VISION);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getRegenerationAmplifier(), MobEffects.REGENERATION);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getSlowFallingAmplifier(), MobEffects.SLOW_FALLING);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getWaterBreathingAmplifier(), MobEffects.WATER_BREATHING);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getWeaknessAmplifier(), MobEffects.WEAKNESS);
 	}
 
+	// Note, 0 is treated as "off" in this method.
 	public static void helperUpdateEffect(ServerPlayer sp, int intensity, Holder<MobEffect> effect) {
+
 		if (intensity == 0)
 			return;
+		
 		if (effect.equals(MobEffects.NIGHT_VISION)) {
 			MobEffectInstance inst = sp.getEffect(MobEffects.NIGHT_VISION);
 			if (inst == null || inst.getDuration() < 220) {
