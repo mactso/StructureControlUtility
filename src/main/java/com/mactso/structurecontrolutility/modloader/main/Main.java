@@ -1,15 +1,15 @@
 // 
-package modloader.main;
+package com.mactso.structurecontrolutility.modloader.main;
 
-import common.command.MyCommands;
-import common.command.utilities.MyUtilities;
-import common.config.MyConfig;
-import common.managers.StructureData;
-import common.managers.StructureManager;
+import com.mactso.structurecontrolutility.common.command.MyCommands;
+import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.managers.StructureData;
+import com.mactso.structurecontrolutility.common.managers.StructureManager;
+import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.config.ModConfig;
@@ -21,11 +21,11 @@ public class Main {
 
 	    public static final String MODID = "structurecontrolutility"; 
 	    
-	    public Main()
+	    public Main(FMLJavaModLoadingContext context)
 	    {
+			context.getModEventBus().register(this);
+			context.registerConfig(ModConfig.Type.COMMON, MyConfig.COMMON_SPEC);
 	    	MyUtilities.debugMsg(0,MODID + ": Registering Mod.");
-	  		FMLJavaModLoadingContext.get().getModEventBus().register(this);
- 	        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON,MyConfig.COMMON_SPEC );
 			
 	    }
 

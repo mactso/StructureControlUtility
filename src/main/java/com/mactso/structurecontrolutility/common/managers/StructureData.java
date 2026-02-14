@@ -1,12 +1,13 @@
-package common.managers;
+package com.mactso.structurecontrolutility.common.managers;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import common.command.utilities.MyUtilities;
-import common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.utility.ModUtilities;
+
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -54,17 +55,18 @@ public class StructureData {
         p.println("* Structure Control Utility will use this file ONLY if it is renamed to structures.csv.");
         p.println("* Lines starting with '*' are comments and ignored");
         p.println("* ");
-        p.println("* Line Number, Structure Name, EffectsString, Effects Minutes, Stop Fire Minutes, Stop Block Breaking Minutes, Stop Explosions Minutes, Mining Fatigue Minutes, Mining Fatigue Level");
-        p.println("* Supported Structure Effects are : Jump Boost, Movement Slowness, Regeneration, Slow Falling, Water Breathing, and Weakness");
-        p.println("* Each digit of the Effects string is an effect power from 0 (off) to 9");
-        p.println("* Mining Fatigue level ranges from 0 (off) to 4 (amplifier)");
-        p.println("* Example Line : Minecraft:Mansion, Effects:110002, 721, 1440, 720, 999999, 120, 2");
-        p.println("* The above line sets Jump Boost 1, Movement Slowness 1, Weakness 2 for 721 minutes,");
-        p.println("* prevents fire for 1440 minutes, digging for 720 minutes, explosions for 999999 minutes,");
-        p.println("* and applies Mining Fatigue 2 for 120 minutes.");
+        p.println("* Each digit of the 'Effects:000000' string is an effect power from 0 (off) to 9");
+        p.println("* The Structure Effects are :, Jump Boost, Movement Slowness, Regeneration, Slow Falling, Water Breathing, and Weakness");
         p.println("* ");
-        p.println("* Line Number, Structure Name, Effects String, Effects Minutes, Stop Fire Minutes, Stop Block Breaking Minutes, Stop Explosions Minutes, Mining Fatigue Minutes, Mining Fatigue Level");
-
+        p.println("* Example Line of a Minecraft:Mansion");
+        p.println("* 0, Minecraft:Mansion, Effects:110002, 721, 1440, 719, 999999, 1500, 2");
+        p.println("* ");
+        p.println("* Players inside Mansion gain effects:, Jump Boost 1, Movement Slowness 1, Weakness 2 for the first 721 minutes,");
+        p.println("* This Mansion is:, fireproof 1440 minutes, will not break for 719 minutes, will not explode for 999999 minutes.");
+        p.println("* This Mansion resists breaking for the first 1500 minutes with Mining Fatigue 2 .");
+        p.println("* ");
+        p.println("* Line Number, Structure Name, Effects String, Effects Minutes, Fireproof Minutes, Stop Block Breaking Minutes, Stop Explosions Minutes, Mining Fatigue Minutes, Mining Fatigue Level");
+        p.println("* ");
 
         int linenumber = 0;
 		MinecraftServer server = event.getServer();
@@ -83,7 +85,7 @@ public class StructureData {
             String effectFlags = "Effects:000000";
 
             // Unprotected structures get zero durations
-            if (MyUtilities.unprotectedStructures.contains(modAndStructure)) {
+            if (ModUtilities.unprotectedStructures.contains(modAndStructure)) {
                 stopFireMinutes = 0;
                 stopBreakingMinutes = 0;
                 stopExplosionsMinutes = 0;

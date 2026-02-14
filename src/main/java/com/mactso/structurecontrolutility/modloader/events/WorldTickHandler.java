@@ -1,7 +1,8 @@
-package modloader.events;
+package com.mactso.structurecontrolutility.modloader.events;
 
-import common.logic.ScheduledBlockCleanup;
-import modloader.main.Main;
+import com.mactso.structurecontrolutility.common.logic.ScheduledBlockCleanup;
+import com.mactso.structurecontrolutility.modloader.main.Main;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent.LevelTickEvent;

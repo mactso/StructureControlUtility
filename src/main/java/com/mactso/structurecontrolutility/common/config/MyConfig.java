@@ -1,9 +1,10 @@
-package common.config;
+package com.mactso.structurecontrolutility.common.config;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import common.command.utilities.MyUtilities;
-import modloader.main.Main;
+import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+import com.mactso.structurecontrolutility.modloader.main.Main;
+
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

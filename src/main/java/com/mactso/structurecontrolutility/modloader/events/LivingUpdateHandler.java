@@ -1,9 +1,8 @@
-package modloader.events;
+package com.mactso.structurecontrolutility.modloader.events;
 
-import common.logic.PlayerTickLogic;
-import net.minecraft.server.level.ServerLevel;
+import com.mactso.structurecontrolutility.common.logic.PlayerTickLogic;
+
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
