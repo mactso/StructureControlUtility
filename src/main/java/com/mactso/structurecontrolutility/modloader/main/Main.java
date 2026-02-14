@@ -1,11 +1,12 @@
 // 
-package modloader.main;
+package com.mactso.structurecontrolutility.modloader.main;
 
-import common.command.MyCommands;
-import common.command.utilities.MyUtilities;
-import common.config.MyConfig;
-import common.managers.StructureData;
-import common.managers.StructureManager;
+import com.mactso.structurecontrolutility.common.command.MyCommands;
+import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.managers.StructureData;
+import com.mactso.structurecontrolutility.common.managers.StructureManager;
+import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,6 +21,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class Main {
 
 	    public static final String MODID = "structurecontrolutility"; 
+	    
 	    
 	    public Main()
 	    {

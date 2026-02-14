@@ -1,7 +1,9 @@
-package modloader.events;
+package com.mactso.structurecontrolutility.modloader.events;
 
-import common.logic.ScheduledBlockCleanup;
-import modloader.main.Main;
+import com.mactso.structurecontrolutility.common.logic.ScheduledBlockCleanup;
+import com.mactso.structurecontrolutility.modloader.main.Main;
+
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -18,9 +20,10 @@ public class FluidEvents {
 		if (sp.isCreative())
 			return;
 	
-		boolean cancel = ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace(),
-				event);
-		if ((cancel) && event.isCancelable()) event.setCanceled(true); // modloaders may not obey this cancel
+		
+		ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace());
+		
+		return ;
 
 	}
 
