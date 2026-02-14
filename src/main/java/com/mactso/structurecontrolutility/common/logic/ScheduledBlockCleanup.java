@@ -76,11 +76,14 @@ public class ScheduledBlockCleanup {
 	public static boolean  handleLavaBucketInProtectedStructure(ServerPlayer sp, InteractionHand hand, BlockPos pos, Direction face, RightClickBlock event) {
 
 		Item item = sp.getItemInHand(hand).getItem();
-	    if (!(item instanceof BucketItem bucket)) return FluidEvents.CONTINUE_EVENT;
-	    if (bucket.getFluid() != Fluids.LAVA) return FluidEvents.CONTINUE_EVENT;
+	    if (!(item instanceof BucketItem bucket)) 
+	      return FluidEvents.CONTINUE_EVENT;
+	    if (bucket.getFluid() != Fluids.LAVA) 
+	      return FluidEvents.CONTINUE_EVENT;
 	
 	    ServerLevel level = sp.level();
-	    if (!MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_FIRE)) return FluidEvents.CONTINUE_EVENT;
+	    if (!MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_FIRE)) 
+	      return FluidEvents.CONTINUE_EVENT;
 	
 	    BlockPos targetPos = (face != null) ? pos.relative(face) : pos;
 	
