@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 import com.mactso.structurecontrolutility.common.utility.MyUtilities;
 import com.mactso.structurecontrolutility.modloader.main.Main;
 
@@ -221,7 +222,7 @@ public class StructureManager {
 
 		// Issue: User accidentally deleted line with a structure.
 		if (si == null) {
-			if (MyUtilities.unprotectedStructures.contains(key)) {
+			if (ModUtilities.unprotectedStructures.contains(key)) {
 				si = defaultUnprotectedStructureItem;
 			} else {
 				si = defaultProtectedStructureItem;
@@ -297,18 +298,18 @@ public class StructureManager {
 		 * Parse the Effects string to initilize the MobEffects amplifiers
 		 */
 		private void setEffectsValues(String s) {
-		    amplifierJumpBoost = parseEffectDigitOrZero(s, MyUtilities.JUMP_BOOST);
+		    amplifierJumpBoost = parseEffectDigitOrZero(s, ModUtilities.JUMP_BOOST);
 		    
-		    amplifierNightVision = parseEffectDigitOrZero(s, MyUtilities.MOVEMENT_SLOWNESS);
+		    amplifierNightVision = parseEffectDigitOrZero(s, ModUtilities.MOVEMENT_SLOWNESS);
 		    if (amplifierNightVision > 1) amplifierNightVision = 1;
 
-		    amplifierRegeneration = parseEffectDigitOrZero(s, MyUtilities.REGENERATION);
-		    amplifierSlowFalling = parseEffectDigitOrZero(s, MyUtilities.SLOW_FALLING);
+		    amplifierRegeneration = parseEffectDigitOrZero(s, ModUtilities.REGENERATION);
+		    amplifierSlowFalling = parseEffectDigitOrZero(s, ModUtilities.SLOW_FALLING);
 
-		    amplifierWaterBreathing = parseEffectDigitOrZero(s, MyUtilities.WATER_BREATHING);
+		    amplifierWaterBreathing = parseEffectDigitOrZero(s, ModUtilities.WATER_BREATHING);
 		    if (amplifierWaterBreathing > 1) amplifierWaterBreathing = 1;
 
-		    amplifierWeakness = parseEffectDigitOrZero(s, MyUtilities.WEAKNESS);
+		    amplifierWeakness = parseEffectDigitOrZero(s, ModUtilities.WEAKNESS);
 		}
 
 		/** 

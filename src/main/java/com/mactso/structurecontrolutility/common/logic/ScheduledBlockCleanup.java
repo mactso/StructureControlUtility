@@ -3,7 +3,7 @@ package com.mactso.structurecontrolutility.common.logic;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -79,7 +79,7 @@ public class ScheduledBlockCleanup {
 			return false;
 
 		ServerLevel level = sp.serverLevel();
-		if (!MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_FIRE))
+		if (!ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_FIRE))
 			return false;
 
 		BlockPos targetPos = (face != null) ? pos.relative(face) : pos;

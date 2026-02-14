@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
-import com.mactso.structurecontrolutility.common.utility.MyUtilities;
+import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -85,7 +85,7 @@ public class StructureData {
             String effectFlags = "Effects:000000";
 
             // Unprotected structures get zero durations
-            if (MyUtilities.unprotectedStructures.contains(modAndStructure)) {
+            if (ModUtilities.unprotectedStructures.contains(modAndStructure)) {
                 stopFireMinutes = 0;
                 stopBreakingMinutes = 0;
                 stopExplosionsMinutes = 0;

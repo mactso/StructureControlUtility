@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
+import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 import com.mactso.structurecontrolutility.common.utility.MyUtilities;
 
 import net.minecraft.core.BlockPos;
@@ -17,43 +18,39 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.level.BlockEvent.BreakEvent;
 
 public class BlockEventsLogic {
 
 	// client side variables.
 	public static long cGameTime = 0;
 	
-	public static boolean isBlockPlacable( LevelAccessor level, BlockPos pos , Player p, Block block) {
-	
+	public static boolean isBlockPlacable(LevelAccessor level, BlockPos pos, Player p, Block block) {
 	
 	    // Fire protection
-	    if (block == Blocks.FIRE && MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_FIRE)) {
+		if (block == Blocks.FIRE && ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_FIRE)) {
 			SpecialEffects.doFireFailureEffects(p, pos);
 			return false;
 	    }
 	
 	    // General block protection
-	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING)) {
-			if (MyUtilities.isProtectableBlock(block.defaultBlockState())) {
+		if (ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_BREAKING)) {
 				if (p instanceof ServerPlayer sp) {
 	                    MyUtilities.updateHands(sp);
 	                }
 				SpecialEffects.doFailureEffects(p, pos);
 				return false;
 	        }
-	    }
 		
 		return true;
 	}
 
-	public static boolean isProtectBlock(ServerPlayer sp, BlockPos pos, BreakEvent event) {
-	    ServerLevel level = (ServerLevel) sp.level();
+	public static boolean canBreakBlock(ServerPlayer sp, BlockPos pos) {
+		ServerLevel serverLevel = (ServerLevel) sp.level();
 	
-	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING) ) {
-	        SpecialEffects.doFailureEffects(sp, pos);
+		if (!(ModUtilities.insideProtectedStructure(serverLevel, pos, ModUtilities.DAMAGE_BREAKING)))
 			return true;
-	    }
+
+		SpecialEffects.doFailureEffects(sp, pos);
 		return false; 
 	}
 
@@ -65,7 +62,7 @@ public class BlockEventsLogic {
 	    RandomSource rand = level.getRandom();
 	    long gameTime = ((Level) level).getGameTime();
 	
-	    if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_BREAKING)) {
+		if (ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_BREAKING)) {
 	        if (BlockEventsLogic.cGameTime < gameTime) {
 	            BlockEventsLogic.cGameTime = gameTime + 10 + rand.nextInt(20);
 	            SpecialEffects.doFailureEffects(sp, pos);
@@ -76,7 +73,7 @@ public class BlockEventsLogic {
 	public static void handleExplosionDetonate(Level level, List<BlockPos> affectedBlocks) {
 	    for (ListIterator<BlockPos> iter = affectedBlocks.listIterator(affectedBlocks.size()); iter.hasPrevious();) {
 	        BlockPos pos = iter.previous();
-	        if (MyUtilities.insideProtectedStructure(level, pos, MyUtilities.DAMAGE_EXPLODING)) {
+			if (ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_EXPLODING)) {
 	            iter.remove();
 	        }
 	    }
@@ -91,7 +88,7 @@ public class BlockEventsLogic {
 	        BlockPos dpos = mPos.relative(d);
 	        if (level.getBlockState(dpos).isFlammable(level, mPos, d.getOpposite())) {
 	            MyUtilities.debugMsg(2, ", is flammable");
-	            if (MyUtilities.insideProtectedStructure(level, mPos, MyUtilities.DAMAGE_FIRE)) {
+				if (ModUtilities.insideProtectedStructure(level, mPos, ModUtilities.DAMAGE_FIRE)) {
 	                MyUtilities.debugMsg(2, d.getName() + ", and is protected.");
 	                ScheduledBlockCleanup.scheduleBlockCleanup(mPos);
 	                ScheduledBlockCleanup.scheduleBlockCleanup(dpos);
