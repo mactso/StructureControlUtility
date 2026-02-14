@@ -34,7 +34,6 @@ public class Main {
 		public void handleCommonSetup (final FMLCommonSetupEvent event) {
 			// nothing happens in here any more.
 		}   
-	    
 
 		@Mod.EventBusSubscriber(bus = Bus.FORGE)
 	    public static class ForgeEvents

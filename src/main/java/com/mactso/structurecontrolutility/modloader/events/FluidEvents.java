@@ -22,9 +22,10 @@ public class FluidEvents {
 			return CONTINUE_EVENT;
 		if (sp.isCreative())
 			return CONTINUE_EVENT;
+
 	
-		boolean returnValue= ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace(),
-				event); 
+		boolean returnValue= ScheduledBlockCleanup.handleLavaBucketInProtectedStructure(sp, event.getHand(), event.getPos(), event.getFace());
+
 		
 		return returnValue;
 
