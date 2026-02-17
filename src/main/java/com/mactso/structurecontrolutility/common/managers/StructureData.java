@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
-import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -55,13 +54,13 @@ public class StructureData {
         p.println("* Structure Control Utility will use this file ONLY if it is renamed to structures.csv.");
         p.println("* Lines starting with '*' are comments and ignored");
         p.println("* ");
-        p.println("* Each digit of the 'Effects:000000' string is an effect power from 0 (off) to 9");
-        p.println("* The Structure Effects are :, Jump Boost, Movement Slowness, Regeneration, Slow Falling, Water Breathing, and Weakness");
+        p.println("* Each digit of the 'Effects:00000000' string is an effect power from 0 (off) to 9");
+        p.println("* The Structure Effects are :, Jump Boost, Movement Slowness, Regeneration, Slow Falling, Water Breathing, Weakness, and Darkness");
         p.println("* ");
         p.println("* Example Line of a Minecraft:Mansion");
-        p.println("* 0, Minecraft:Mansion, Effects:110002, 721, 1440, 719, 999999, 1500, 2");
+        p.println("* 0, Minecraft:Mansion, Effects:1100021, 721, 1440, 719, 999999, 1500, 2");
         p.println("* ");
-        p.println("* Players inside Mansion gain effects:, Jump Boost 1, Movement Slowness 1, Weakness 2 for the first 721 minutes,");
+        p.println("* Players inside Mansion gain effects:, Jump Boost 1, Movement Slowness 1, Weakness 2, Darkness 1 for the first 721 minutes,");
         p.println("* This Mansion is:, fireproof 1440 minutes, will not break for 719 minutes, will not explode for 999999 minutes.");
         p.println("* This Mansion resists breaking for the first 1500 minutes with Mining Fatigue 2 .");
         p.println("* ");
@@ -72,7 +71,7 @@ public class StructureData {
 		MinecraftServer server = event.getServer();
 		Registry<Structure> structRegistry = server.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
-        int effectsMinutes = MyConfig.getEffectsMinutes();
+        int effectsMinutes = MyConfig.getStructureEffectsMinutes();
         int stopFireMinutes = MyConfig.getStopFireMinutes();
         int stopBreakingMinutes = MyConfig.getStopBreakingMinutes();
         int stopExplosionsMinutes = MyConfig.getStopExplosionMinutes();
@@ -82,15 +81,16 @@ public class StructureData {
         for (Structure struct : structRegistry) {
             String modAndStructure = structRegistry.getKey(struct).toString();
 
-            String effectFlags = "Effects:000000";
+            String effectFlags = "Effects:" + MyConfig.getProtectedStructuresEffects();
 
             // Unprotected structures get zero durations
-            if (ModUtilities.unprotectedStructures.contains(modAndStructure)) {
+            if (StructureManager.unprotectedStructures.contains(modAndStructure)) {
                 stopFireMinutes = 0;
                 stopBreakingMinutes = 0;
                 stopExplosionsMinutes = 0;
                 miningFatigueMinutes = 0;
                 miningFatigueLevel = 0;
+                effectFlags = "Effects:" + MyConfig.getUnprotectedStructuresEffects();
             }
 
             p.println(++linenumber + ", " + modAndStructure + ", " + effectFlags + ", "

@@ -22,6 +22,7 @@ public class BlockBreakEvents {
     @SubscribeEvent
     public static void onBreakBlock(BreakEvent event) {
 
+		
         if (event.getPlayer().level().getChunk(event.getPos()).getInhabitedTime() > com.mactso.structurecontrolutility.common.config.MyConfig.getStopBreakingTicks())
             return;
 
@@ -40,6 +41,7 @@ public class BlockBreakEvents {
     @SubscribeEvent
     public static void onBreakingSpeed(BreakSpeed event) {
 
+		
         if (!(event.getEntity() instanceof ServerPlayer sp))
             return;
 

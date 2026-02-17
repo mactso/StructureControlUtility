@@ -21,6 +21,7 @@ public class ExplosionEvents {
 
     @SubscribeEvent
     public static void onExplosionDetonate(Detonate event) {
+		
         Level level = event.getLevel();
         List<BlockPos> affectedBlocks = event.getAffectedBlocks();
         BlockEventsLogic.handleExplosionDetonate(level, affectedBlocks);

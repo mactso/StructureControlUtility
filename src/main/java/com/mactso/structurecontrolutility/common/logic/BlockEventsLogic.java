@@ -31,7 +31,7 @@ public class BlockEventsLogic {
 			SpecialEffects.doFireFailureEffects(p, pos);
 			return false;
 		}
-		int debug = 5;
+
 		// General block protection
 		if (ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_BREAKING)) {
 				if (p instanceof ServerPlayer sp) {

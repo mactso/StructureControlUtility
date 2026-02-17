@@ -1,7 +1,5 @@
 package com.mactso.structurecontrolutility.common.utility;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -43,9 +41,16 @@ import net.minecraftforge.common.Tags;
  */
 
 public class ModUtilities {
-	
+
+	// block breaking return values.
 	private static final boolean ALLOW_BREAK = true;
 	private static final boolean PREVENT_BREAK = false;
+
+	// damage types mod can protect structure from.
+	public static int DAMAGE_FIRE = 0;
+	public static int DAMAGE_BREAKING = 1;
+	public static int DAMAGE_EXPLODING = 2;
+
 
 	/**
 	 * This returns true if the User is inside a structure AND if the structure is
@@ -58,20 +63,26 @@ public class ModUtilities {
 	 * 
 	 * This may need to be decomposed into "inside a structure" and protection logic
 	 */
+	
 	public static boolean insideProtectedStructure(LevelAccessor level, BlockPos pos, int damageType) {
 
 		ChunkAccess chunk = level.getChunk(pos);
 		long ageInTicks = chunk.getInhabitedTime();
 
 		BlockState bs = level.getBlockState(pos);
+		
+		if (isBlockBreakable(bs))
+			return false;
+
 		Block block = bs.getBlock();
+
+		boolean isLava = false;
+		if (block == Blocks.FIRE)
+			isLava = true;
 
 		boolean isFire = false;
 		if (block == Blocks.FIRE)
 			isFire = true;
-
-		if (isBlockBreakable(bs))
-			return false;
 
 		Registry<Structure> structRegistry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
@@ -79,13 +90,19 @@ public class ModUtilities {
 		if (structureReferences.isEmpty())
 			return false;
 
+		
 		for (Entry<Structure, LongSet> structure : structureReferences) {
 
 			Structure structureKey = structure.getKey();
 			Identifier key = structRegistry.getKey(structureKey);
 
 			StructureItem si = StructureManager.getStructureItemOrDefault(key.toString());
-
+			
+			// Structures without fire, explosion, or breaking protection can be damaged.
+			
+			if (!(si.isProtected()))
+				continue;
+			
 			LongIterator longiterator = structure.getValue().iterator();
 			while (longiterator.hasNext()) {
 
@@ -95,21 +112,22 @@ public class ModUtilities {
 				StructureStart structurestart = iStructureReader.getStartForStructure(structureKey);
 				
 				BoundingBox boundingBox;
-				if (!isFire) {
-					boundingBox = structurestart.getBoundingBox();
-				} else {
+				if (isFire || isLava) {
 					boundingBox = structurestart.getBoundingBox().inflatedBy(1, 1, 1);
+				} else {
+					boundingBox = structurestart.getBoundingBox();
 				}
 
 				if (((boundingBox.isInside(pos)))) {
 					if ((isDamageTypeProtectionInEffect(damageType, ageInTicks, si)))
-						return true;
+						return true;  // we found the structure we are in AND it is protected against this kind of damage.
 				}
 			}
 		}
 		return false;
 	}
 	
+
 
 	/**
 	 * This method identifies which blocks can be broken in a structure protected
@@ -170,17 +188,6 @@ public class ModUtilities {
 		return true;
 	}
 
-	public static int DAMAGE_FIRE = 0;
-	public static int DAMAGE_BREAKING = 1;
-	public static int DAMAGE_EXPLODING = 2;
-	public static List<String> unprotectedStructures = Arrays.asList("minecraft:mineshaft", "minecraft:mineshaft_mesa",
-			"minecraft:trail_ruins", "minecraft:village_desert", "minecraft:village_plains",
-			"minecraft:village_savanna", "minecraft:village_snowy", "minecraft:village_taiga");
-	public static int JUMP_BOOST = 0;
-	public static int MOVEMENT_SLOWNESS = 1;
-	public static int REGENERATION = 2;
-	public static int SLOW_FALLING = 3;
-	public static int WATER_BREATHING = 4;
-	public static int WEAKNESS = 5;
+
 
 }

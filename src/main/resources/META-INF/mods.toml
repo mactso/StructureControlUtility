@@ -10,12 +10,13 @@ displayName="Structure Control Utility Mod"
 logoFile="Logo.png"
 authors="MacTso, Lupicus"
 description='Structure Control Utility Mod.'
+
 [[dependencies.structurecontrolutility]]
 modId="forge"
 mandatory=true
 versionRange="[61,)"
 ordering="NONE"
-side="BOTH"
+side="SERVER"
 
 [[dependencies.structurecontrolutility]]
 modId="minecraft"
