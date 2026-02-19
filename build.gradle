@@ -9,7 +9,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = "forge_21.3_" + mod_id +"_CC"
+    archivesName = "forge_21.3_" + mod_id +"_CC1"
 }
 
 // Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
