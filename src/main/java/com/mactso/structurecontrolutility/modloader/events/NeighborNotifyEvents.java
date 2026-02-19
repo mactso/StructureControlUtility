@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 /**
- * Handles NeighborNotifyEvents, specifically for fire.
+ * Handles NeighborNotifyEvents, specifically for fire spreading.
  * Protects blocks from fire spread if inside a protected structure.
  */
 @Mod.EventBusSubscriber(bus = Bus.FORGE, modid = Main.MODID)

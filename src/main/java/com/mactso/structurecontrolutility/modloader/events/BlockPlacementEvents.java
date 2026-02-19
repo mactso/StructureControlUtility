@@ -2,6 +2,7 @@ package com.mactso.structurecontrolutility.modloader.events;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
 import com.mactso.structurecontrolutility.common.logic.BlockEventsLogic;
+import com.mactso.structurecontrolutility.common.logic.ScheduledBlockCleanup;
 import com.mactso.structurecontrolutility.modloader.main.Main;
 
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 /**
  * Handles block placement events for players.
  * Cancels placement if the block is not allowed in protected structures.
+ * 
  */
 @Mod.EventBusSubscriber(bus = Bus.FORGE, modid = Main.MODID)
 public class BlockPlacementEvents {
@@ -42,6 +44,8 @@ public class BlockPlacementEvents {
 
 
         if (!BlockEventsLogic.isBlockPlacable(level, pos, p, block)) {
+        	if (block == Blocks.FIRE)
+        		ScheduledBlockCleanup.scheduleBlockCleanup(pos);
 			return CANCEL_EVENT;
         }
         

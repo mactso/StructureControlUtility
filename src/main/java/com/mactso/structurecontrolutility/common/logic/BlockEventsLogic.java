@@ -19,20 +19,30 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
+/**
+ * Centralized server-side logic for enforcing structure protection rules on
+ * block placement, breaking, explosions, and fire propagation.
+ * <p>
+ * This class is stateless except for minimal client-rate-limiting data and
+ * is intended to be called from Forge/Fabric/NeoForge event handlers.
+ * </p>
+ */
+
 public class BlockEventsLogic {
 
-	// client side variables.
+	/** Client-side rate limiter for repeated failure effects. */
 	public static long cGameTime = 0;
 
+	/** Determines if block is being placed inside a protected structure is allowed */
 	public static boolean isBlockPlacable(LevelAccessor level, BlockPos pos, Player p, Block block) {
 
-		// Fire protection
+		// Prevent fire placement inside protected structures.
 		if (block == Blocks.FIRE && ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_FIRE)) {
 			SpecialEffects.doFireFailureEffects(p, pos);
 			return false;
 		}
 
-		// General block protection
+		// Prevent general block placement inside protected structures.
 		if (ModUtilities.insideProtectedStructure(level, pos, ModUtilities.DAMAGE_BREAKING)) {
 				if (p instanceof ServerPlayer sp) {
 					MyUtilities.updateHands(sp);
@@ -44,6 +54,7 @@ public class BlockEventsLogic {
 		return true;
 	}
 
+
 	public static boolean canBreakBlock(ServerPlayer sp, BlockPos pos) {
 		ServerLevel serverLevel = (ServerLevel) sp.level();
 
@@ -54,6 +65,7 @@ public class BlockEventsLogic {
 		return false; 
 	}
 
+	/** Applies throttled visual/audio feedback when breaking is blocked by protection. */
 	public static void handleBreakingSpeed(ServerPlayer sp, BlockPos pos) {
 		LevelAccessor level = sp.level();
 		if (level.getChunk(pos).getInhabitedTime() > MyConfig.getStopBreakingTicks())
@@ -70,6 +82,7 @@ public class BlockEventsLogic {
 		}
 	}
 
+	/** Prevents explosions from damaging hard blocks that are part of a protected Structures. */
 	public static void handleExplosionDetonate(Level level, List<BlockPos> affectedBlocks) {
 		for (ListIterator<BlockPos> iter = affectedBlocks.listIterator(affectedBlocks.size()); iter.hasPrevious();) {
 			BlockPos pos = iter.previous();
@@ -79,6 +92,8 @@ public class BlockEventsLogic {
 		}
 	}
 
+
+	/** Prevents fire spread into protected structures during neighbor updates. */
 	public static void handleNeighborNotify(LevelAccessor level, BlockPos pos, Iterable<Direction> notifiedSides) {
 		MutableBlockPos mPos = new MutableBlockPos(pos.getX(), pos.getY(), pos.getZ());
 
