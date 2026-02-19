@@ -15,10 +15,13 @@ import net.minecraftforge.fml.common.Mod;
  */
 
 @Mod.EventBusSubscriber()
-public class LivingUpdateHandler {
+public class LivingTickEvents {
 
 	@SubscribeEvent
 	public static void onLivingUpdate(LivingTickEvent event) {
+
+		//		boolean disable = true;
+//		if (disable) return;
 
 		if (!(event.getEntity() instanceof ServerPlayer sp))
 			return;

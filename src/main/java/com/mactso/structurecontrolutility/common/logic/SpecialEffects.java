@@ -14,6 +14,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Utility methods for spawning server-side visual and audio effects
  * used to indicate failed actions (e.g., blocked interactions).
+ * Witch Particle are used for preventing block breaking
+ * Small Fire Particles are used for block fires 
  */
 	
 public class SpecialEffects {
