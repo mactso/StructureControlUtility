@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 /**
  * Handles block placement events for players.
  * Cancels placement if the block is not allowed in protected structures.
+ * 
  */
 @Mod.EventBusSubscriber(bus = Bus.FORGE, modid = Main.MODID)
 public class BlockPlacementEvents {

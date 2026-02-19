@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -14,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mactso.structurecontrolutility.common.config.MyConfig;
-import com.mactso.structurecontrolutility.common.utility.ModUtilities;
 import com.mactso.structurecontrolutility.common.utility.MyUtilities;
 import com.mactso.structurecontrolutility.modloader.main.Main;
 
@@ -30,22 +30,29 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+
 /**
  * Manages structure definitions and their associated effect rules.
  *
- * <p>Responsibilities:
+ * <p>
+ * Responsibilities:
  * <ul>
  *     <li>Load structure data from `Structures.csv`.</li>
  *     <li>Provide default protection values for unregistered structures.</li>
- *     <li>Track per-structure effect durations, protections, and potion amplifiers.</li>
+ * <li>Track per-structure effect durations, protections, and potion
+ * amplifiers.</li>
  *     <li>Determine if a position is inside a structure.</li>
- *     <li>Support multiple potion effects including Mining Fatigue (configurable duration and amplifier).</li>
+ * <li>Support multiple potion effects including Mining Fatigue (configurable
+ * duration and amplifier).</li>
  * </ul>
  *
- * <p>Notes:
+ * <p>
+ * Notes:
  * <ul>
- *     <li>Static defaults are initialized at startup using the current config values.</li>
- *     <li>Parsing is robust: malformed lines are logged but do not break startup.</li>
+ * <li>Static defaults are initialized at startup using the current config
+ * values.</li>
+ * <li>Parsing is robust: malformed lines are logged but do not break
+ * startup.</li>
  *     <li>Derived values (ticks) are precomputed for efficiency.</li>
  * </ul>
  */
@@ -55,17 +62,31 @@ public class StructureManager {
 	static int lastgoodline = 0;
 	static final int TICKS_PER_MINUTE = 1200;
 	private static final Logger LOGGER = LogManager.getLogger();
-	static String regex = "[0-9][0-9][0-9][0-9][0-9][0-9]";
+	static String regex = "[0-9][0-9][0-9][0-9][0-9][0-9][0-9]";
 	static Pattern pattern = Pattern.compile(regex);
-	static StructureItem defaultUnprotectedStructureItem = 
-		    new StructureItem(0, "000000", 0, 0, 0, 0, 0, 0);
 
-		static StructureItem defaultProtectedStructureItem = 
-		    new StructureItem(0, "000000", MyConfig.getEffectsMinutes(), MyConfig.getStopFireMinutes(), 
-		                      MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes(), MyConfig.getMiningFatigueMinutes(), MyConfig.getMiningFatigueLevel());
+	// Types of structures that don't have protection by default.
+	public static List<String> unprotectedStructures;
 
+
+	private static StructureItem defaultUnprotectedStructureItem = new StructureItem(0, MyConfig.getUnprotectedStructuresEffects(), MyConfig.getStructureEffectsMinutes(), 0, 0, 0, 0, 0);
+	private static StructureItem defaultProtectedStructureItem = new StructureItem(0, MyConfig.getProtectedStructuresEffects(), MyConfig.getStructureEffectsMinutes(),
+			MyConfig.getStopFireMinutes(), MyConfig.getStopBreakingMinutes(), MyConfig.getStopExplosionMinutes(),
+			MyConfig.getMiningFatigueMinutes(), MyConfig.getMiningFatigueLevel());
+	
+	// types of effects a structure can have
+	public static final int JUMP_BOOST = 0;
+	public static final int MOVEMENT_SLOWNESS = 1;
+	public static final int REGENERATION = 2;
+	public static final int SLOW_FALLING = 3;
+	public static final int WATER_BREATHING = 4;
+	public static final int WEAKNESS = 5;
+	public static final int GLOOM = 6; // Uses Minecraft.Darkness if server only.
 
 	public static void structureInit() {
+		
+	    unprotectedStructures = MyConfig.getUnprotectedStructuresAsList();
+	    
 		int lineNumber;
 		int loadedCount = 0;
 		String modAndStructure = "";
@@ -76,8 +97,6 @@ public class StructureManager {
 		int stopExplosionsMinutes;
 		int miningFatigueMinutes;   // number of minutes the effect lasts
 		int miningFatigueAmplifier;     // amplifier, 0 = off, max 4
-
-		
 
 		int linecount = 0;
 
@@ -104,7 +123,6 @@ public class StructureManager {
 				
 				linecount++;
 				
-
 				try {
 					String[] parts = line.split(",", -1); // preserve empty fields
 
@@ -125,10 +143,10 @@ public class StructureManager {
 					errorField = "effectFlags";
 					effectFlags = parts[2].trim();
 
-					if (effectFlags.length() != 14) {
+					if (effectFlags.length() != 15) {
 						LOGGER.error(modAndStructure + " effects string of '" + effectFlags
-								+ "' in Structures.csv is too short or long.  It was set to Effects:000000.");
-						effectFlags = "Effects:000000";
+								+ "' in Structures.csv is too short or long.  It was set to Effects:0000000.");
+						effectFlags = "Effects:0000000";
 					}
 
 					effectFlags = effectFlags.substring(8);
@@ -158,8 +176,10 @@ public class StructureManager {
 					miningFatigueAmplifier = Integer.parseInt(parts[8].trim());
 
 					// clamp amplifier
-					if (miningFatigueAmplifier < 1) miningFatigueAmplifier = 1;
-					if (miningFatigueAmplifier > 5) miningFatigueAmplifier = 5;
+					if (miningFatigueAmplifier < 1)
+						miningFatigueAmplifier = 1;
+					if (miningFatigueAmplifier > 5)
+						miningFatigueAmplifier = 5;
 
 					lastgoodline = lineNumber;
 
@@ -172,6 +192,7 @@ public class StructureManager {
 					errorField = "put Structure Item";
 					structureMap.put(modAndStructure, si);
 
+					loadedCount ++;
 
 				} catch (Exception e) {
 					MyUtilities.debugMsg(0, Main.MODID + " Error reading field " + errorField + " on " + linecount
@@ -229,7 +250,7 @@ public class StructureManager {
 
 		// Issue: User accidentally deleted line with a structure.
 		if (si == null) {
-			if (ModUtilities.unprotectedStructures.contains(key)) {
+			if (unprotectedStructures.contains(key)) {
 				si = defaultUnprotectedStructureItem;
 			} else {
 				si = defaultProtectedStructureItem;
@@ -243,7 +264,8 @@ public class StructureManager {
 	/**
 	 * Represents a single structure's configuration and derived effect values.
 	 *
-	 * <p>Stores per-structure information including:
+	 * <p>
+	 * Stores per-structure information including:
 	 * <ul>
 	 *     <li>Line number from the CSV file</li>
 	 *     <li>Effect flags string and individual potion effect intensities</li>
@@ -252,8 +274,9 @@ public class StructureManager {
 	 *     <li>Derived tick counts for each duration for efficient runtime use</li>
 	 * </ul>
 	 *
-	 * <p>Provides helper methods to check for active effects and to access 
-	 * both minute-based and tick-based durations.
+	 * <p>
+	 * Provides helper methods to check for active effects and to access both
+	 * minute-based and tick-based durations.
 	 */
 	public static class StructureItem {
 		int lineNumber;
@@ -273,14 +296,16 @@ public class StructureManager {
 		long miningFatigueTicks;    
 
 		int amplifierJumpBoost;
-		int amplifierNightVision;
+		int amplifierMovementSlowness;
 		int amplifierRegeneration;
 		int amplifierSlowFalling;
 		int amplifierWaterBreathing;
 		int amplifierWeakness;
+		int amplifierGloomOrDarkness;
 
 		public StructureItem(int lineNumber, String effectFlags, int effectMinutes, int stopFireMinutes,
-				int stopBreakingMinutes, int stopExplosionsMinutes, int miningFatigueMinutes, int rawMiningFatigueAmplifier) {
+				int stopBreakingMinutes, int stopExplosionsMinutes, int miningFatigueMinutes,
+				int rawMiningFatigueAmplifier) {
 
 			this.lineNumber = lineNumber;
 			this.effectFlags = effectFlags;
@@ -305,36 +330,59 @@ public class StructureManager {
 		 * Parse the Effects string to initilize the MobEffects amplifiers
 		 */
 		private void setEffectsValues(String s) {
-		    amplifierJumpBoost = parseEffectDigitOrZero(s, ModUtilities.JUMP_BOOST);
 		    
-		    amplifierNightVision = parseEffectDigitOrZero(s, ModUtilities.MOVEMENT_SLOWNESS);
-		    if (amplifierNightVision > 1) amplifierNightVision = 1;
+			amplifierJumpBoost = parseEffectDigitOrZero(s, JUMP_BOOST);
 
-		    amplifierRegeneration = parseEffectDigitOrZero(s, ModUtilities.REGENERATION);
-		    amplifierSlowFalling = parseEffectDigitOrZero(s, ModUtilities.SLOW_FALLING);
+			amplifierMovementSlowness = parseEffectDigitOrZero(s, MOVEMENT_SLOWNESS);
+			if (amplifierMovementSlowness > 1)
+				amplifierMovementSlowness = 1;
 
-		    amplifierWaterBreathing = parseEffectDigitOrZero(s, ModUtilities.WATER_BREATHING);
-		    if (amplifierWaterBreathing > 1) amplifierWaterBreathing = 1;
+			amplifierRegeneration = parseEffectDigitOrZero(s, REGENERATION);
+			amplifierSlowFalling = parseEffectDigitOrZero(s, SLOW_FALLING);
 
-		    amplifierWeakness = parseEffectDigitOrZero(s, ModUtilities.WEAKNESS);
+			amplifierWaterBreathing = parseEffectDigitOrZero(s, WATER_BREATHING);
+			if (amplifierWaterBreathing > 1)
+				amplifierWaterBreathing = 1;
+
+			amplifierWeakness = parseEffectDigitOrZero(s, WEAKNESS);
+			amplifierGloomOrDarkness = parseEffectDigitOrZero(s, GLOOM);
+
 		}
 
 		/** 
-		 * Returns the numeric value of the character at the given index,
-		 * or 0 if the character is not a valid digit.
+		 * Returns the numeric value of the character at the given index, or 0 if the
+		 * character is not a valid digit.
 		 */
 		private int parseEffectDigitOrZero(String s, int index) {
-		    if (index < 0 || index >= s.length()) return 0;
+			if (index < 0 || index >= s.length())
+				return 0;
 		    int value = Character.getNumericValue(s.charAt(index));
-		    return value >= 0 ? value : 0;
+		    if (value >= 0) {
+		        return value;
+		    } else {
+		        return 0;
+		    }
 		}
 
 		public boolean hasEffects() {
 
-			if (!this.effectFlags.equals("000000")) {
+			if (!this.effectFlags.equals("0000000")) {
 				return true;
 			}
 
+			return false;
+		}
+
+		/**
+		 * Returns true if the structure has no remaining protection of any kind.
+		 */
+		public boolean isProtected() {
+			if (this.stopBreakingMinutes > 0)
+				return true;
+			if (this.stopFireMinutes > 0)
+				return true;
+			if (this.stopExplosionsMinutes > 0)
+				return true;
 			return false;
 		}
 
@@ -342,8 +390,8 @@ public class StructureManager {
 			return amplifierJumpBoost;
 		}
 
-		public int getNightVisionAmplifier() {
-			return amplifierNightVision;
+		public int getMoveSlownessAmplifier() {
+			return amplifierMovementSlowness;
 		}
 
 		public int getRegenerationAmplifier() {
@@ -362,6 +410,10 @@ public class StructureManager {
 			return amplifierWeakness;
 		}
 
+		public int getGloomOrDarknessAmplifier() {
+			return amplifierGloomOrDarkness;
+		}
+		
 		public int getStopFireMinutes() {
 			return stopFireMinutes;
 		}
@@ -393,7 +445,6 @@ public class StructureManager {
 			return stopBreakingTicks;
 		}
 
-
 		public long getStopFireTicks() {
 			return stopFireTicks;
 		}
@@ -402,14 +453,9 @@ public class StructureManager {
 			return stopExplosionsTicks;
 		}
 
-		
 		public long getMiningFatigueTicks() {
 			return miningFatigueTicks;
 		}
-		
-		
-
-		
 
 	}
 

@@ -3,14 +3,18 @@ package com.mactso.structurecontrolutility.common.logic;
 import com.mactso.structurecontrolutility.common.config.MyConfig;
 import com.mactso.structurecontrolutility.common.managers.StructureManager;
 import com.mactso.structurecontrolutility.common.managers.StructureManager.StructureItem;
+import com.mactso.structurecontrolutility.common.mobeffects.server.GloomServerHandler;
 import com.mactso.structurecontrolutility.common.utility.MyUtilities;
 
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+
+/**
+ * Controls structure-related effects that apply to players.
+ */
 
 public class PlayerTickLogic {
 
@@ -38,35 +42,32 @@ public class PlayerTickLogic {
 			return;
 
 		// Mining fatigue
-		if (si.isMiningFatigue() && si.getMiningFatigueTicks() > 
-		ageInTicks) {
-			PlayerTickLogic.helperUpdateEffect(sp, si.getMiningFatigueAmplifier()+1, MobEffects.DIG_SLOWDOWN);
+		if (si.isMiningFatigue() && si.getMiningFatigueTicks() > ageInTicks) {
+			PlayerTickLogic.helperUpdateEffect(sp, si.getMiningFatigueAmplifier() + 1, MobEffects.DIG_SPEED);
 		}
 
 		// Other effects
 		PlayerTickLogic.helperUpdateEffect(sp, si.getJumpBoostAmplifier(), MobEffects.JUMP);
-		PlayerTickLogic.helperUpdateEffect(sp, si.getNightVisionAmplifier(), MobEffects.NIGHT_VISION);
+		PlayerTickLogic.helperUpdateEffect(sp, si.getMoveSlownessAmplifier(), MobEffects.MOVEMENT_SLOWDOWN);
 		PlayerTickLogic.helperUpdateEffect(sp, si.getRegenerationAmplifier(), MobEffects.REGENERATION);
 		PlayerTickLogic.helperUpdateEffect(sp, si.getSlowFallingAmplifier(), MobEffects.SLOW_FALLING);
 		PlayerTickLogic.helperUpdateEffect(sp, si.getWaterBreathingAmplifier(), MobEffects.WATER_BREATHING);
 		PlayerTickLogic.helperUpdateEffect(sp, si.getWeaknessAmplifier(), MobEffects.WEAKNESS);
+		// Delegate to server adapter to decide: Gloom (client-side visual) or vanilla
+		// Darkness
+		GloomServerHandler.applyGloomOrDarkness(sp, si.getGloomOrDarknessAmplifier());
 	}
 
 	// Note, 0 is treated as "off" in this method.
-	public static void helperUpdateEffect(ServerPlayer sp, int intensity, Holder<MobEffect> effect) {
+	public static void helperUpdateEffect(ServerPlayer sp, int amplifier, Holder<MobEffect> effect) {
 
-		if (intensity == 0)
+		if (amplifier == 0) // 0 == effect not applied.
 			return;
 		
-		if (effect.equals(MobEffects.NIGHT_VISION)) {
-			MobEffectInstance inst = sp.getEffect(MobEffects.NIGHT_VISION);
-			if (inst == null || inst.getDuration() < 220) {
-				sp.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 600, 0, false, false, true));
-			}
+		amplifier -= 1; // now rebase to start at 0
 
-		} else {
-			MyUtilities.updateEffect(sp, intensity - 1, effect, MyUtilities.FOUR_SECONDS);
-		}
+		MyUtilities.updateEffect(sp, amplifier, effect, MyUtilities.FOUR_SECONDS);
+
 	}
 
 }
