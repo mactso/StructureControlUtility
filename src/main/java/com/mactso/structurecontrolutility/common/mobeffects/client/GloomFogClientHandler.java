@@ -157,6 +157,21 @@ public class GloomFogClientHandler {
 	@SubscribeEvent
 	public static void onComputeFogColor(ViewportEvent.ComputeFogColor event) {
 	    
+	    Minecraft mc = Minecraft.getInstance();
+	    if (mc.player == null) {
+//	        System.out.println("[GLOOM] onRenderFog: no player, exiting");
+	        return ;
+	    }
+
+	    LivingEntity player = mc.player;
+	    MobEffectInstance gloom = player.getEffect(MyMobEffects.getGloomHolder());
+	    boolean hasGloom = gloom != null;
+	    
+	    if (!hasGloom && currentVisualIntensity <= 0.0f) {
+//	        System.out.println("[GLOOM] onRenderFog: no gloom & fully faded, exiting");
+	        return ;
+	    }
+	    
 	    event.setRed(MyConfig.getGloomRed());
 	    event.setGreen(MyConfig.getGloomGreen());
 	    event.setBlue(MyConfig.getGloomBlue());
